@@ -18,6 +18,7 @@
         <module>raft-java-core</module>
         <module>raft-java-example</module>
         <module>raft-java-admin</module>
+        <module>raft-kv</module>
     </modules>
 
 </project>

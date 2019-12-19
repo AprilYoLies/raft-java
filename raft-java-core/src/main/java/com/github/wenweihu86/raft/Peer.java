@@ -19,7 +19,7 @@ public class Peer {
     private long matchIndex;
     private volatile Boolean voteGranted;
     private volatile boolean isCatchUp;
-
+    // 保存了 Server 实例，构建了 RpcClient
     public Peer(RaftProto.Server server) {
         this.server = server;
         this.rpcClient = new RpcClient(new Endpoint(

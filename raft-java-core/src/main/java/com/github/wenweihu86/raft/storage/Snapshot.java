@@ -38,19 +38,19 @@ public class Snapshot {
     private AtomicBoolean isTakeSnapshot = new AtomicBoolean(false);
     private Lock lock = new ReentrantLock();
 
-    public Snapshot(String raftDataDir) {
-        this.snapshotDir = raftDataDir + File.separator + "snapshot";
+    public Snapshot(String raftDataDir) {   // 创建快照类，主要是创建了快照对应的目录
+        this.snapshotDir = raftDataDir + File.separator + "snapshot";   // 快照目录
         String snapshotDataDir = snapshotDir + File.separator + "data";
         File file = new File(snapshotDataDir);
         if (!file.exists()) {
             file.mkdirs();
         }
     }
-
+    // 尝试从本地获取快照元数据，没有的话就构建一个
     public void reload() {
-        metaData = this.readMetaData();
+        metaData = this.readMetaData(); // 尝试读取本地快照的元数据
         if (metaData == null) {
-            metaData = RaftProto.SnapshotMetaData.newBuilder().build();
+            metaData = RaftProto.SnapshotMetaData.newBuilder().build(); // 本地没有快照元数据，那么就自己构建一个
         }
     }
 
@@ -90,9 +90,9 @@ public class Snapshot {
             }
         }
     }
-
+    // 尝试读取本地快照的元数据
     public RaftProto.SnapshotMetaData readMetaData() {
-        String fileName = snapshotDir + File.separator + "metadata";
+        String fileName = snapshotDir + File.separator + "metadata";    // /Users/eva/IdeaProjects/raft-java/raft-java-example/data/snapshot/metadata
         File file = new File(fileName);
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             RaftProto.SnapshotMetaData metadata = RaftFileUtils.readProtoFromFile(

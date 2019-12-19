@@ -42,7 +42,7 @@ public class ExampleStateMachine implements StateMachine {
         }
     }
 
-    @Override
+    @Override   // 如果 rocksdb 文件夹存在，删除，然后将快照的文件夹拷贝到 rocksdb 中，最后构建 RocksDB，打开位置为 rocksdb 目录
     public void readSnapshot(String snapshotDir) {
         try {
             // copy snapshot dir to data dir
@@ -50,13 +50,13 @@ public class ExampleStateMachine implements StateMachine {
                 db.close();
             }
             String dataDir = raftDataDir + File.separator + "rocksdb_data";
-            File dataFile = new File(dataDir);
+            File dataFile = new File(dataDir);  // /Users/eva/IdeaProjects/raft-java/raft-java-example/data/rocksdb_data
             if (dataFile.exists()) {
                 FileUtils.deleteDirectory(dataFile);
             }
             File snapshotFile = new File(snapshotDir);
             if (snapshotFile.exists()) {
-                FileUtils.copyDirectory(snapshotFile, dataFile);
+                FileUtils.copyDirectory(snapshotFile, dataFile);    // 将快照 data 拷贝到 rocksdb 中
             }
             // open rocksdb data dir
             Options options = new Options();

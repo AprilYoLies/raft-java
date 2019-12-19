@@ -31,39 +31,39 @@ public class ServerMain {
         String[] splitArray = servers.split(",");
         List<RaftProto.Server> serverList = new ArrayList<>();
         for (String serverString : splitArray) {
-            RaftProto.Server server = parseServer(serverString);
+            RaftProto.Server server = parseServer(serverString);    // 应该就是通过服务器的地址及端口信息构建了 RaftProto.Server 实例
             serverList.add(server);
         }
         // local server
-        RaftProto.Server localServer = parseServer(args[2]);
+        RaftProto.Server localServer = parseServer(args[2]);    // 应该就是通过服务器的地址及端口信息构建了 RaftProto.Server 实例
 
         // 初始化RPCServer
-        RpcServer server = new RpcServer(localServer.getEndpoint().getPort());
+        RpcServer server = new RpcServer(localServer.getEndpoint().getPort());  // 真正用于通信的 RPC server
         // 设置Raft选项，比如：
         // just for test snapshot
-        RaftOptions raftOptions = new RaftOptions();
+        RaftOptions raftOptions = new RaftOptions();    // 和 raft 相关的属性
         raftOptions.setDataDir(dataPath);
         raftOptions.setSnapshotMinLogSize(10 * 1024);
         raftOptions.setSnapshotPeriodSeconds(30);
         raftOptions.setMaxSegmentFileSize(1024 * 1024);
         // 应用状态机
-        ExampleStateMachine stateMachine = new ExampleStateMachine(raftOptions.getDataDir());
-        // 初始化RaftNode
+        ExampleStateMachine stateMachine = new ExampleStateMachine(raftOptions.getDataDir());   // 创建 ExampleStateMachine，保存了路径
+        // 初始化RaftNode，保存了 raftOptions，构建了 RaftProto.Configuration，创建 snapshot 并尝试从本地加载快照元数据，创建 raftLog 并加载了本地元数据，比较快照范围，执行后续的日志项，更新 applyIndex
         RaftNode raftNode = new RaftNode(raftOptions, serverList, localServer, stateMachine);
         // 注册Raft节点之间相互调用的服务
-        RaftConsensusService raftConsensusService = new RaftConsensusServiceImpl(raftNode);
-        server.registerService(raftConsensusService);
+        RaftConsensusService raftConsensusService = new RaftConsensusServiceImpl(raftNode); // 将 RaftNode 保存到 RaftConsensusServiceImpl 实例中
+        server.registerService(raftConsensusService);   // 将当前的服务注册到 RpcServer
         // 注册给Client调用的Raft服务
-        RaftClientService raftClientService = new RaftClientServiceImpl(raftNode);
-        server.registerService(raftClientService);
+        RaftClientService raftClientService = new RaftClientServiceImpl(raftNode);  // 将 RaftNode 保存到 RaftClientServiceImpl 实例中
+        server.registerService(raftClientService);  // 将当前的服务注册到 RpcServer
         // 注册应用自己提供的服务
-        ExampleService exampleService = new ExampleServiceImpl(raftNode, stateMachine);
-        server.registerService(exampleService);
+        ExampleService exampleService = new ExampleServiceImpl(raftNode, stateMachine); // 将 RaftNode,ExampleStateMachine 保存到 ExampleServiceImpl 实例中
+        server.registerService(exampleService); // 将当前的服务注册到 RpcServer
         // 启动RPCServer，初始化Raft节点
-        server.start();
-        raftNode.init();
+        server.start(); // 仅仅是启动 RpcServer
+        raftNode.init();    // 将其它节点封装为 Peer，里边保存了 RpcClient 以及下一个日志项索引
     }
-
+    // 应该就是通过服务器的地址及端口信息构建了 RaftProto.Server 实例
     private static RaftProto.Server parseServer(String serverString) {
         String[] splitServer = serverString.split(":");
         String host = splitServer[0];

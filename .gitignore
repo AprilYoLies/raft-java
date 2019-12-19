@@ -14,3 +14,4 @@ logs/
 *artifacts
 .DS_Store
 env
+data

@@ -36,7 +36,7 @@ public class RaftNode {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftNode.class);
-    private static final JsonFormat jsonFormat = new JsonFormat();
+    private static final JsonFormat jsonFormat = new JsonFormat();  // 应该是 protobuf 和 json 相关的字段
 
     private RaftOptions raftOptions;
     private RaftProto.Configuration configuration;
@@ -46,7 +46,7 @@ public class RaftNode {
     private SegmentedLog raftLog;
     private Snapshot snapshot;
 
-    private NodeState state = NodeState.STATE_FOLLOWER;
+    private NodeState state = NodeState.STATE_FOLLOWER; // 初始状态为 STATE_FOLLOWER
     // 服务器最后一次知道的任期号（初始化为 0，持续递增）
     private long currentTerm;
     // 在当前获得选票的候选人的Id
@@ -58,20 +58,20 @@ public class RaftNode {
     private volatile long lastAppliedIndex;
 
     private Lock lock = new ReentrantLock();
-    private Condition commitIndexCondition = lock.newCondition();
+    private Condition commitIndexCondition = lock.newCondition();   // 两个 condition 量
     private Condition catchUpCondition = lock.newCondition();
 
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture electionScheduledFuture;
     private ScheduledFuture heartbeatScheduledFuture;
-
+    // 保存了 raftOptions，构建了 RaftProto.Configuration，创建 snapshot 并尝试从本地加载快照元数据，创建 raftLog 并加载了本地元数据，比较快照范围，执行后续的日志项，更新 applyIndex
     public RaftNode(RaftOptions raftOptions,
                     List<RaftProto.Server> servers,
                     RaftProto.Server localServer,
                     StateMachine stateMachine) {
         this.raftOptions = raftOptions;
-        RaftProto.Configuration.Builder confBuilder = RaftProto.Configuration.newBuilder();
+        RaftProto.Configuration.Builder confBuilder = RaftProto.Configuration.newBuilder(); // 协议的 Configuration，protobuf 生成
         for (RaftProto.Server server : servers) {
             confBuilder.addServers(server);
         }
@@ -81,44 +81,44 @@ public class RaftNode {
         this.stateMachine = stateMachine;
 
         // load log and snapshot
-        raftLog = new SegmentedLog(raftOptions.getDataDir(), raftOptions.getMaxSegmentFileSize());
-        snapshot = new Snapshot(raftOptions.getDataDir());
-        snapshot.reload();
+        raftLog = new SegmentedLog(raftOptions.getDataDir(), raftOptions.getMaxSegmentFileSize());  // 尝试加载段数据（本地），加载了本地的元数据
+        snapshot = new Snapshot(raftOptions.getDataDir());  // 创建快照类，主要是创建了快照对应的目录
+        snapshot.reload();  // 尝试从本地获取快照元数据，没有的话就构建一个
 
-        currentTerm = raftLog.getMetaData().getCurrentTerm();
-        votedFor = raftLog.getMetaData().getVotedFor();
-        commitIndex = Math.max(snapshot.getMetaData().getLastIncludedIndex(), commitIndex);
-        // discard old log entries
+        currentTerm = raftLog.getMetaData().getCurrentTerm();   // 获取日志元数据中的任期号
+        votedFor = raftLog.getMetaData().getVotedFor(); // 获取日志元数据中的投票值
+        commitIndex = Math.max(snapshot.getMetaData().getLastIncludedIndex(), commitIndex); // 确定 commit index
+        // discard old log entries 丢弃过期日志项
         if (snapshot.getMetaData().getLastIncludedIndex() > 0
                 && raftLog.getFirstLogIndex() <= snapshot.getMetaData().getLastIncludedIndex()) {
-            raftLog.truncatePrefix(snapshot.getMetaData().getLastIncludedIndex() + 1);
+            raftLog.truncatePrefix(snapshot.getMetaData().getLastIncludedIndex() + 1);  // 进行快照后的日志项需要删除
         }
         // apply state machine
         RaftProto.Configuration snapshotConfiguration = snapshot.getMetaData().getConfiguration();
         if (snapshotConfiguration.getServersCount() > 0) {
             configuration = snapshotConfiguration;
         }
-        String snapshotDataDir = snapshot.getSnapshotDir() + File.separator + "data";
-        stateMachine.readSnapshot(snapshotDataDir);
+        String snapshotDataDir = snapshot.getSnapshotDir() + File.separator + "data";   // 快照目录
+        stateMachine.readSnapshot(snapshotDataDir); // 通过状态机读取快照，如果 rocksdb 文件夹存在，删除，然后将快照的文件夹拷贝到 rocksdb 中，最后构建 RocksDB，打开位置为 rocksdb 目录
         for (long index = snapshot.getMetaData().getLastIncludedIndex() + 1;
-             index <= commitIndex; index++) {
-            RaftProto.LogEntry entry = raftLog.getEntry(index);
-            if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA) {
+             index <= commitIndex; index++) {   // 如果快照之后到 commitIndex 之间有剩余的日志项
+            RaftProto.LogEntry entry = raftLog.getEntry(index); // 获取这条日志项
+            if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA) {   // 如果这个日志项是数据，那么就交由状态机执行
                 stateMachine.apply(entry.getData().toByteArray());
-            } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {
+            } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {   // 如果是配置项块，应用配置项
                 applyConfiguration(entry);
             }
         }
-        lastAppliedIndex = commitIndex;
+        lastAppliedIndex = commitIndex; // 更新 applyIndex 到 commitIndex
     }
 
-    public void init() {
+    public void init() {    // 将其它节点封装为 Peer，里边保存了 RpcClient 以及下一个日志项索引
         for (RaftProto.Server server : configuration.getServersList()) {
             if (!peerMap.containsKey(server.getServerId())
-                    && server.getServerId() != localServer.getServerId()) {
-                Peer peer = new Peer(server);
-                peer.setNextIndex(raftLog.getLastLogIndex() + 1);
-                peerMap.put(server.getServerId(), peer);
+                    && server.getServerId() != localServer.getServerId()) { // 这里应该是将其它节点封装为 Peer
+                Peer peer = new Peer(server);   // 保存了 Server 实例，构建了 RpcClient，返回 Peer
+                peer.setNextIndex(raftLog.getLastLogIndex() + 1);   // 维护的其它节点的日志位置，初始为 LastLogIndex + 1
+                peerMap.put(server.getServerId(), peer);    // 将其它节点的信息保存到 peerMap 中
             }
         }
 
@@ -416,35 +416,35 @@ public class RaftNode {
             ex.printStackTrace();
         }
     }
-
+    // 尝试获取最后一条日志项，如果日志不为空，就从日志中获取，否则获取快照的最后一条日志项的任期号
     public long getLastLogTerm() {
-        long lastLogIndex = raftLog.getLastLogIndex();
-        if (lastLogIndex >= raftLog.getFirstLogIndex()) {
+        long lastLogIndex = raftLog.getLastLogIndex();  // 获取最后一条索引
+        if (lastLogIndex >= raftLog.getFirstLogIndex()) {   // 如果能够确保不会获取到过期日志项
             return raftLog.getEntryTerm(lastLogIndex);
         } else {
             // log为空，lastLogIndex == lastSnapshotIndex
-            return snapshot.getMetaData().getLastIncludedTerm();
+            return snapshot.getMetaData().getLastIncludedTerm();    // 如果日志为空，那么最后一条日志项就是快照的最后一条日志项
         }
     }
 
     /**
      * 选举定时器
-     */
+     */ // 如果 electionScheduledFuture 不为空，那么取消任务，重新提交一个选举任务，超时时间是随机的
     private void resetElectionTimer() {
-        if (electionScheduledFuture != null && !electionScheduledFuture.isDone()) {
+        if (electionScheduledFuture != null && !electionScheduledFuture.isDone()) { // 如果有任务正在执行，需要取消其中的任务
             electionScheduledFuture.cancel(true);
-        }
+        }   // 获取一个随机超时时间，为选举超时时间加上 0 ~ electionTimeout 之间的数
         electionScheduledFuture = scheduledExecutorService.schedule(new Runnable() {
             @Override
             public void run() {
                 startPreVote();
-            }
+            }   // 获取一个随机超时时间，为选举超时时间加上 0 ~ electionTimeout 之间的数
         }, getElectionTimeoutMs(), TimeUnit.MILLISECONDS);
     }
-
+    // 获取一个随机超时时间，为选举超时时间加上 0 ~ electionTimeout 之间的数
     private int getElectionTimeoutMs() {
         ThreadLocalRandom random = ThreadLocalRandom.current();
-        int randomElectionTimeout = raftOptions.getElectionTimeoutMilliseconds()
+        int randomElectionTimeout = raftOptions.getElectionTimeoutMilliseconds()    // 默认是 5000 ms
                 + random.nextInt(0, raftOptions.getElectionTimeoutMilliseconds());
         LOG.debug("new election time is after {} ms", randomElectionTimeout);
         return randomElectionTimeout;
@@ -458,22 +458,22 @@ public class RaftNode {
      */
     private void startPreVote() {
         lock.lock();
-        try {
+        try {   // 如果配置中不包含自身，那么就不再继续后边的流程（本次的任务会被 cancel）
             if (!ConfigurationUtils.containsServer(configuration, localServer.getServerId())) {
                 resetElectionTimer();
                 return;
             }
             LOG.info("Running pre-vote in term {}", currentTerm);
-            state = NodeState.STATE_PRE_CANDIDATE;
+            state = NodeState.STATE_PRE_CANDIDATE;  // 更新状态为预候选人态
         } finally {
             lock.unlock();
         }
 
         for (RaftProto.Server server : configuration.getServersList()) {
-            if (server.getServerId() == localServer.getServerId()) {
+            if (server.getServerId() == localServer.getServerId()) {    // 配置中的节点，忽略自己
                 continue;
             }
-            final Peer peer = peerMap.get(server.getServerId());
+            final Peer peer = peerMap.get(server.getServerId());    // 获取对应的 Peer 实例
             executorService.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -527,10 +527,10 @@ public class RaftNode {
         lock.lock();
         try {
             peer.setVoteGranted(null);
-            requestBuilder.setServerId(localServer.getServerId())
-                    .setTerm(currentTerm)
-                    .setLastLogIndex(raftLog.getLastLogIndex())
-                    .setLastLogTerm(getLastLogTerm());
+            requestBuilder.setServerId(localServer.getServerId())   // 自己的 ServerId
+                    .setTerm(currentTerm)   // 当前的任期号
+                    .setLastLogIndex(raftLog.getLastLogIndex()) // 自己的最新日志索引号
+                    .setLastLogTerm(getLastLogTerm());  // 尝试获取最后一条日志项，如果日志不为空，就从日志中获取，否则获取快照的最后一条日志项
         } finally {
             lock.unlock();
         }

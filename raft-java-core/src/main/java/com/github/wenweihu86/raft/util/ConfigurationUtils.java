@@ -13,7 +13,7 @@ public class ConfigurationUtils {
     public static boolean containsServer(RaftProto.Configuration configuration, int serverId) {
         for (RaftProto.Server server : configuration.getServersList()) {
             if (server.getServerId() == serverId) {
-                return true;
+                return true;    // 如果配置项中包含自己，直接返回 true
             }
         }
         return false;

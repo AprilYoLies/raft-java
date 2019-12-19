@@ -28,7 +28,7 @@ public class SegmentedLog {
     private TreeMap<Long, Segment> startLogIndexSegmentMap = new TreeMap<>();
     // segment log占用的内存大小，用于判断是否需要做snapshot
     private volatile long totalSize;
-
+    // 尝试加载段数据（本地），加载了本地的元数据
     public SegmentedLog(String raftDataDir, int maxSegmentFileSize) {
         this.logDir = raftDataDir + File.separator + "log";
         this.logDataDir = logDir + File.separator + "data";
@@ -37,12 +37,12 @@ public class SegmentedLog {
         if (!file.exists()) {
             file.mkdirs();
         }
-        readSegments();
-        for (Segment segment : startLogIndexSegmentMap.values()) {
+        readSegments(); // 尝试读本地文件
+        for (Segment segment : startLogIndexSegmentMap.values()) {  // 段文件的加载
             this.loadSegmentData(segment);
         }
 
-        metaData = this.readMetaData();
+        metaData = this.readMetaData(); // 从元数据文件中读取数据，期间进行了 crc32 校验
         if (metaData == null) {
             if (startLogIndexSegmentMap.size() > 0) {
                 LOG.error("No readable metadata file but found segments in {}", logDir);
@@ -53,7 +53,7 @@ public class SegmentedLog {
     }
 
     public RaftProto.LogEntry getEntry(long index) {
-        long firstLogIndex = getFirstLogIndex();
+        long firstLogIndex = getFirstLogIndex();    // 通过日志的元数据块获取第一条日志项的索引
         long lastLogIndex = getLastLogIndex();
         if (index == 0 || index < firstLogIndex || index > lastLogIndex) {
             LOG.debug("index out of range, index={}, firstLogIndex={}, lastLogIndex={}",
@@ -74,7 +74,7 @@ public class SegmentedLog {
         }
         return entry.getTerm();
     }
-
+    // 通过日志的元数据块获取第一条日志项的索引
     public long getFirstLogIndex() {
         return metaData.getFirstLogIndex();
     }
@@ -267,9 +267,9 @@ public class SegmentedLog {
             segment.setEndIndex(segment.getEntries().get(entrySize - 1).entry.getIndex());
         }
     }
-
+    // 尝试读本地文件
     public void readSegments() {
-        try {
+        try {   // 列出 /Users/eva/IdeaProjects/raft-java/raft-java-example/data/log/data 下边的全部文件
             List<String> fileNames = RaftFileUtils.getSortedFilesInDirectory(logDataDir, logDataDir);
             for (String fileName : fileNames) {
                 String[] splitArray = fileName.split("-");
@@ -302,12 +302,12 @@ public class SegmentedLog {
             throw new RuntimeException("open segment file error");
         }
     }
-
+    // 从元数据文件中读取数据，期间进行了 crc32 校验
     public RaftProto.LogMetaData readMetaData() {
-        String fileName = logDir + File.separator + "metadata";
+        String fileName = logDir + File.separator + "metadata"; // /Users/eva/IdeaProjects/raft-java/raft-java-example/data/log/metadata
         File file = new File(fileName);
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
-            RaftProto.LogMetaData metadata = RaftFileUtils.readProtoFromFile(
+            RaftProto.LogMetaData metadata = RaftFileUtils.readProtoFromFile(   // 从元数据文件中读取数据，期间进行了 crc32 校验
                     randomAccessFile, RaftProto.LogMetaData.class);
             return metadata;
         } catch (IOException ex) {

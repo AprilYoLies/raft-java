@@ -16,7 +16,7 @@ import java.util.zip.CRC32;
 public class RaftFileUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftFileUtils.class);
-
+    // 列出 /Users/eva/IdeaProjects/raft-java/raft-java-example/data/log/data 下边的全部文件
     public static List<String> getSortedFilesInDirectory(
             String dirName, String rootDirName) throws IOException {
         List<String> fileList = new ArrayList<>();
@@ -78,10 +78,10 @@ public class RaftFileUtils {
                 outputStream.close();
             }
         } catch (IOException ex) {
-            LOG.warn("close file error, msg={}", ex.getMessage());
+            LOG.warn("close file error , msg={}", ex.getMessage());
         }
     }
-
+    // 从元数据文件中读取数据，期间进行了 crc32 校验
     public static <T extends Message> T readProtoFromFile(RandomAccessFile raf, Class<T> clazz) {
         try {
             long crc32FromFile = raf.readLong();

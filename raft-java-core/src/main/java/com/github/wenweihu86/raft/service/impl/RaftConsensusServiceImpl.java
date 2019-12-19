@@ -22,7 +22,7 @@ import java.util.*;
 public class RaftConsensusServiceImpl implements RaftConsensusService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftConsensusServiceImpl.class);
-    private static final JsonFormat PRINTER = new JsonFormat();
+    private static final JsonFormat PRINTER = new JsonFormat(); // protobuf 和 json 打印相关的实例
 
     private RaftNode raftNode;
 
