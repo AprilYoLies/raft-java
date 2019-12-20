@@ -78,15 +78,15 @@ public class SegmentedLog {
     public long getFirstLogIndex() {
         return metaData.getFirstLogIndex();
     }
-
+    // 获取最后一个日志项的索引（最新日志项的索引）
     public long getLastLogIndex() {
         // 有两种情况segment为空
         // 1、第一次初始化，firstLogIndex = 1，lastLogIndex = 0
         // 2、snapshot刚完成，日志正好被清理掉，firstLogIndex = snapshotIndex + 1， lastLogIndex = snapshotIndex
         if (startLogIndexSegmentMap.size() == 0) {
-            return getFirstLogIndex() - 1;
+            return getFirstLogIndex() - 1;  // 如果暂时没有日志块，那就是元数据日志的第一条日志项的索引值减一
         }
-        Segment lastSegment = startLogIndexSegmentMap.lastEntry().getValue();
+        Segment lastSegment = startLogIndexSegmentMap.lastEntry().getValue();   // 获取最后一个日志块的最后一个日志项
         return lastSegment.getEndIndex();
     }
 

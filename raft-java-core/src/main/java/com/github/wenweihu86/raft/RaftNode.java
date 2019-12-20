@@ -194,15 +194,15 @@ public class RaftNode {
     }
 
     public void appendEntries(Peer peer) {
-        RaftProto.AppendEntriesRequest.Builder requestBuilder = RaftProto.AppendEntriesRequest.newBuilder();
+        RaftProto.AppendEntriesRequest.Builder requestBuilder = RaftProto.AppendEntriesRequest.newBuilder();    // 构建一个追加日志的消息 Builder
         long prevLogIndex;
         long numEntries;
 
         boolean isNeedInstallSnapshot = false;
         lock.lock();
         try {
-            long firstLogIndex = raftLog.getFirstLogIndex();
-            if (peer.getNextIndex() < firstLogIndex) {
+            long firstLogIndex = raftLog.getFirstLogIndex();    // 获取第一个日志项的索引值
+            if (peer.getNextIndex() < firstLogIndex) {  // 判断是否需要安装快照（Peer 下一日志项在本机日志项索引之前，需要安装快照）
                 isNeedInstallSnapshot = true;
             }
         } finally {
@@ -211,72 +211,72 @@ public class RaftNode {
 
         LOG.debug("is need snapshot={}, peer={}", isNeedInstallSnapshot, peer.getServer().getServerId());
         if (isNeedInstallSnapshot) {
-            if (!installSnapshot(peer)) {
+            if (!installSnapshot(peer)) {   // 如果需要安装快照，进行快照的安装操作
                 return;
             }
         }
 
         long lastSnapshotIndex;
         long lastSnapshotTerm;
-        snapshot.getLock().lock();
+        snapshot.getLock().lock();  // 获取快照读取的锁
         try {
-            lastSnapshotIndex = snapshot.getMetaData().getLastIncludedIndex();
-            lastSnapshotTerm = snapshot.getMetaData().getLastIncludedTerm();
+            lastSnapshotIndex = snapshot.getMetaData().getLastIncludedIndex();  // 快照元信息中最后一个日志项的索引
+            lastSnapshotTerm = snapshot.getMetaData().getLastIncludedTerm();    // 快照元信息中最后一个日志项的任期
         } finally {
             snapshot.getLock().unlock();
         }
 
         lock.lock();
         try {
-            long firstLogIndex = raftLog.getFirstLogIndex();
-            Validate.isTrue(peer.getNextIndex() >= firstLogIndex);
-            prevLogIndex = peer.getNextIndex() - 1;
+            long firstLogIndex = raftLog.getFirstLogIndex();    // 第一条日志项
+            Validate.isTrue(peer.getNextIndex() >= firstLogIndex);  // 这时一定要求 Peer 的下一个位置是在本机日志项之后的
+            prevLogIndex = peer.getNextIndex() - 1; // 目标日志项的上一条日志项
             long prevLogTerm;
-            if (prevLogIndex == 0) {
+            if (prevLogIndex == 0) {    // 如果之前没有日志项，假定之前的任期为 0
                 prevLogTerm = 0;
-            } else if (prevLogIndex == lastSnapshotIndex) {
+            } else if (prevLogIndex == lastSnapshotIndex) { // 这里是以最后一个快照的最后一个日志项作为上一个日志项的索引值和任期
                 prevLogTerm = lastSnapshotTerm;
             } else {
-                prevLogTerm = raftLog.getEntryTerm(prevLogIndex);
+                prevLogTerm = raftLog.getEntryTerm(prevLogIndex);   // 直接获取索引位置对应的日志项
             }
-            requestBuilder.setServerId(localServer.getServerId());
-            requestBuilder.setTerm(currentTerm);
-            requestBuilder.setPrevLogTerm(prevLogTerm);
-            requestBuilder.setPrevLogIndex(prevLogIndex);
-            numEntries = packEntries(peer.getNextIndex(), requestBuilder);
-            requestBuilder.setCommitIndex(Math.min(commitIndex, prevLogIndex + numEntries));
+            requestBuilder.setServerId(localServer.getServerId());  // 本机 id
+            requestBuilder.setTerm(currentTerm);    // 当前任期
+            requestBuilder.setPrevLogTerm(prevLogTerm); // 上一个日志项任期
+            requestBuilder.setPrevLogIndex(prevLogIndex);   // 上一个日志项的索引
+            numEntries = packEntries(peer.getNextIndex(), requestBuilder);  // 将多条日志项打包到 AppendEntriesRequest 中，返回打包的数量
+            requestBuilder.setCommitIndex(Math.min(commitIndex, prevLogIndex + numEntries));    // commitIndex 不能超过自身的 commitIndex
         } finally {
             lock.unlock();
         }
 
-        RaftProto.AppendEntriesRequest request = requestBuilder.build();
-        RaftProto.AppendEntriesResponse response = peer.getRaftConsensusServiceAsync().appendEntries(request);
+        RaftProto.AppendEntriesRequest request = requestBuilder.build();    // 构建真正的 AppendEntriesRequest
+        RaftProto.AppendEntriesResponse response = peer.getRaftConsensusServiceAsync().appendEntries(request);  // 发送追加日志项的请求
 
         lock.lock();
         try {
-            if (response == null) {
+            if (response == null) { // 如果响应为 null，那么可以确定向 peer 追加日志时失败了
                 LOG.warn("appendEntries with peer[{}:{}] failed",
                         peer.getServer().getEndpoint().getHost(),
-                        peer.getServer().getEndpoint().getPort());
+                        peer.getServer().getEndpoint().getPort());  // 如果配置列表中此时不包含该 peer 了，需要将该 peer 移除并关闭其持有的 rpc 客户端
                 if (!ConfigurationUtils.containsServer(configuration, peer.getServer().getServerId())) {
                     peerMap.remove(peer.getServer().getServerId());
                     peer.getRpcClient().stop();
                 }
                 return;
             }
-            LOG.info("AppendEntries response[{}] from server {} " +
+            LOG.info("AppendEntries response[{}] from server {} " + // 日志追加成功
                             "in term {} (my term is {})",
                     response.getResCode(), peer.getServer().getServerId(),
                     response.getTerm(), currentTerm);
 
-            if (response.getTerm() > currentTerm) {
+            if (response.getTerm() > currentTerm) { // 如果被追加日志项的节点的任期比自己的高，需要降级
                 stepDown(response.getTerm());
             } else {
-                if (response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {
-                    peer.setMatchIndex(prevLogIndex + numEntries);
-                    peer.setNextIndex(peer.getMatchIndex() + 1);
+                if (response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {  // 如果响应结果代码为成功
+                    peer.setMatchIndex(prevLogIndex + numEntries);  // 更新 peer 的 matchIndex
+                    peer.setNextIndex(peer.getMatchIndex() + 1);    // 更新 peer 的 nextIndex
                     if (ConfigurationUtils.containsServer(configuration, peer.getServer().getServerId())) {
-                        advanceCommitIndex();
+                        advanceCommitIndex();   // 根据各个节点的 matchIndex 来计算得到 commitIndex（超过半数的匹配即可提交），本机执行日志项到 commitIndex，更新 applyIndex
                     } else {
                         if (raftLog.getLastLogIndex() - peer.getMatchIndex() <= raftOptions.getCatchupMargin()) {
                             LOG.debug("peer catch up the leader");
@@ -487,18 +487,18 @@ public class RaftNode {
     /**
      * 客户端发起正式vote，对candidate有效
      */
-    private void startVote() {
+    private void startVote() {  // 这时节点的身份变成了 candidate
         lock.lock();
         try {
-            if (!ConfigurationUtils.containsServer(configuration, localServer.getServerId())) {
+            if (!ConfigurationUtils.containsServer(configuration, localServer.getServerId())) { // 如果自己已经不在配置项中，那么重置流程
                 resetElectionTimer();
                 return;
             }
-            currentTerm++;
+            currentTerm++;  // 任期自增
             LOG.info("Running for election in term {}", currentTerm);
-            state = NodeState.STATE_CANDIDATE;
+            state = NodeState.STATE_CANDIDATE;  // 标记自己的当前状态为 candidate
             leaderId = 0;
-            votedFor = localServer.getServerId();
+            votedFor = localServer.getServerId();   // 声明自己给自己投票了，那么就不会再给别人投票
         } finally {
             lock.unlock();
         }
@@ -507,11 +507,11 @@ public class RaftNode {
             if (server.getServerId() == localServer.getServerId()) {
                 continue;
             }
-            final Peer peer = peerMap.get(server.getServerId());
+            final Peer peer = peerMap.get(server.getServerId());    // 请求其它节点为自己投票
             executorService.submit(new Runnable() {
                 @Override
                 public void run() {
-                    requestVote(peer);
+                    requestVote(peer);  // 请求其它节点为自己投票
                 }
             });
         }
@@ -526,7 +526,7 @@ public class RaftNode {
         RaftProto.VoteRequest.Builder requestBuilder = RaftProto.VoteRequest.newBuilder();
         lock.lock();
         try {
-            peer.setVoteGranted(null);
+            peer.setVoteGranted(null);  // 构建的 VoteRequest 里边包含了必要的投票请求参数
             requestBuilder.setServerId(localServer.getServerId())   // 自己的 ServerId
                     .setTerm(currentTerm)   // 当前的任期号
                     .setLastLogIndex(raftLog.getLastLogIndex()) // 自己的最新日志索引号
@@ -535,30 +535,30 @@ public class RaftNode {
             lock.unlock();
         }
 
-        RaftProto.VoteRequest request = requestBuilder.build();
-        peer.getRaftConsensusServiceAsync().preVote(
-                request, new PreVoteResponseCallback(peer, request));
+        RaftProto.VoteRequest request = requestBuilder.build(); // 构建真正的 VoteRequest
+        peer.getRaftConsensusServiceAsync().preVote(    // 通过代理类进行真正的 rpc 通信
+                request, new PreVoteResponseCallback(peer, request));   // request 是传输的内容
     }
 
     /**
      * 客户端发起正式vote请求
      * @param peer 服务端节点信息
      */
-    private void requestVote(Peer peer) {
+    private void requestVote(Peer peer) {   // 请求其它节点为自己投票
         LOG.info("begin vote request");
-        RaftProto.VoteRequest.Builder requestBuilder = RaftProto.VoteRequest.newBuilder();
+        RaftProto.VoteRequest.Builder requestBuilder = RaftProto.VoteRequest.newBuilder();  // 此处构建的投票请求
         lock.lock();
         try {
-            peer.setVoteGranted(null);
-            requestBuilder.setServerId(localServer.getServerId())
-                    .setTerm(currentTerm)
-                    .setLastLogIndex(raftLog.getLastLogIndex())
-                    .setLastLogTerm(getLastLogTerm());
+            peer.setVoteGranted(null);  // 初始化投票的结果（置空）
+            requestBuilder.setServerId(localServer.getServerId())   // 自己的唯一 id
+                    .setTerm(currentTerm)   // 当前任期号
+                    .setLastLogIndex(raftLog.getLastLogIndex()) // 自己最新一条日志项的索引
+                    .setLastLogTerm(getLastLogTerm());  // 自己最新一条日志项的任期号
         } finally {
             lock.unlock();
         }
 
-        RaftProto.VoteRequest request = requestBuilder.build();
+        RaftProto.VoteRequest request = requestBuilder.build(); // 构建真正的 VoteRequest
         peer.getRaftConsensusServiceAsync().requestVote(
                 request, new VoteResponseCallback(peer, request));
     }
@@ -566,7 +566,7 @@ public class RaftNode {
     private class PreVoteResponseCallback implements RpcCallback<RaftProto.VoteResponse> {
         private Peer peer;
         private RaftProto.VoteRequest request;
-
+        // 保存了 Peer 和 VoteRequest
         public PreVoteResponseCallback(Peer peer, RaftProto.VoteRequest request) {
             this.peer = peer;
             this.request = request;
@@ -576,20 +576,20 @@ public class RaftNode {
         public void success(RaftProto.VoteResponse response) {
             lock.lock();
             try {
-                peer.setVoteGranted(response.getGranted());
+                peer.setVoteGranted(response.getGranted()); // 将其它节点的投票结果进行标记
                 if (currentTerm != request.getTerm() || state != NodeState.STATE_PRE_CANDIDATE) {
                     LOG.info("ignore preVote RPC result");
                     return;
                 }
-                if (response.getTerm() > currentTerm) {
+                if (response.getTerm() > currentTerm) { // 如果别人的任期号大于自己的任期号
                     LOG.info("Received pre vote response from server {} " +
                                     "in term {} (this server's term was {})",
                             peer.getServer().getServerId(),
                             response.getTerm(),
                             currentTerm);
-                    stepDown(response.getTerm());
+                    stepDown(response.getTerm());   // 别人的任期号比自己的大，需要降级
                 } else {
-                    if (response.getGranted()) {
+                    if (response.getGranted()) {    // 如果这个节点投的是赞成票
                         LOG.info("get pre vote granted from server {} for term {}",
                                 peer.getServer().getServerId(), currentTerm);
                         int voteGrantedNum = 1;
@@ -597,16 +597,16 @@ public class RaftNode {
                             if (server.getServerId() == localServer.getServerId()) {
                                 continue;
                             }
-                            Peer peer1 = peerMap.get(server.getServerId());
-                            if (peer1.isVoteGranted() != null && peer1.isVoteGranted() == true) {
-                                voteGrantedNum += 1;
+                            Peer peer1 = peerMap.get(server.getServerId());  // 这里是获取其它节点的投票情况
+                            if (peer1.isVoteGranted() != null && peer1.isVoteGranted() == true) {   // 如果其它节点给自己投了赞成票
+                                voteGrantedNum += 1;    // 票数增加
                             }
                         }
-                        LOG.info("preVoteGrantedNum={}", voteGrantedNum);
-                        if (voteGrantedNum > configuration.getServersCount() / 2) {
+                        LOG.info("preVoteGrantedNum={}", voteGrantedNum);   // 输出得票数
+                        if (voteGrantedNum > configuration.getServersCount() / 2) { // 如果得票数超过半数
                             LOG.info("get majority pre vote, serverId={} when pre vote, start vote",
                                     localServer.getServerId());
-                            startVote();
+                            startVote();    // 这才是真正的投票，之前只是为了避免 term 不断上涨
                         }
                     } else {
                         LOG.info("pre vote denied by server {} with term {}, my term is {}",
@@ -640,42 +640,42 @@ public class RaftNode {
         public void success(RaftProto.VoteResponse response) {
             lock.lock();
             try {
-                peer.setVoteGranted(response.getGranted());
+                peer.setVoteGranted(response.getGranted()); // 标记其它节点的投票结果
                 if (currentTerm != request.getTerm() || state != NodeState.STATE_CANDIDATE) {
-                    LOG.info("ignore requestVote RPC result");
+                    LOG.info("ignore requestVote RPC result");  // 如果自己当前的任期号和发起请求的任期号不同，或者自己不是候选人身份，需要忽略本次的投票结果
                     return;
                 }
-                if (response.getTerm() > currentTerm) {
+                if (response.getTerm() > currentTerm) { // 如果响应的任期号比自己的高
                     LOG.info("Received RequestVote response from server {} " +
                                     "in term {} (this server's term was {})",
                             peer.getServer().getServerId(),
                             response.getTerm(),
                             currentTerm);
-                    stepDown(response.getTerm());
+                    stepDown(response.getTerm());   // 降级
                 } else {
-                    if (response.getGranted()) {
+                    if (response.getGranted()) {    // 如果收到的是赞成票
                         LOG.info("Got vote from server {} for term {}",
                                 peer.getServer().getServerId(), currentTerm);
-                        int voteGrantedNum = 0;
-                        if (votedFor == localServer.getServerId()) {
-                            voteGrantedNum += 1;
+                        int voteGrantedNum = 0; // 统计得票数
+                        if (votedFor == localServer.getServerId()) {    // 将自己标记为给自己投票了，不再给其它节点投票
+                            voteGrantedNum += 1;    // 得票数自增
                         }
-                        for (RaftProto.Server server : configuration.getServersList()) {
+                        for (RaftProto.Server server : configuration.getServersList()) {    // 统计其它节点给自己的投票情况
                             if (server.getServerId() == localServer.getServerId()) {
                                 continue;
                             }
-                            Peer peer1 = peerMap.get(server.getServerId());
+                            Peer peer1 = peerMap.get(server.getServerId()); // 统计其它节点给自己的投票情况
                             if (peer1.isVoteGranted() != null && peer1.isVoteGranted() == true) {
-                                voteGrantedNum += 1;
+                                voteGrantedNum += 1;    // 如果其它节点给自己投了赞成票，票数自增
                             }
                         }
-                        LOG.info("voteGrantedNum={}", voteGrantedNum);
-                        if (voteGrantedNum > configuration.getServersCount() / 2) {
-                            LOG.info("Got majority vote, serverId={} become leader", localServer.getServerId());
-                            becomeLeader();
+                        LOG.info("voteGrantedNum={}", voteGrantedNum);  // 打印得票数
+                        if (voteGrantedNum > configuration.getServersCount() / 2) { // 如果得票数超过了半数
+                            LOG.info("Got majority vote, serverId={} become leader", localServer.getServerId());    // 自己的得票数超过半数了
+                            becomeLeader(); // 执行晋升 Leader 的操作
                         }
                     } else {
-                        LOG.info("Vote denied by server {} with term {}, my term is {}",
+                        LOG.info("Vote denied by server {} with term {}, my term is {}",    // 如果收到的是否定票，直接打印日志不做处理
                                 peer.getServer().getServerId(), response.getTerm(), currentTerm);
                     }
                 }
@@ -694,11 +694,11 @@ public class RaftNode {
     }
 
     // in lock
-    private void becomeLeader() {
-        state = NodeState.STATE_LEADER;
+    private void becomeLeader() {   // 更新自身的状态，取消正在执行的任务
+        state = NodeState.STATE_LEADER; // 更新状态
         leaderId = localServer.getServerId();
         // stop vote timer
-        if (electionScheduledFuture != null && !electionScheduledFuture.isDone()) {
+        if (electionScheduledFuture != null && !electionScheduledFuture.isDone()) { // 如果定时任务不为空，且任务未完成，取消正在执行的任务
             electionScheduledFuture.cancel(true);
         }
         // start heartbeat timer
@@ -708,10 +708,10 @@ public class RaftNode {
     // heartbeat timer, append entries
     // in lock
     private void resetHeartbeatTimer() {
-        if (heartbeatScheduledFuture != null && !heartbeatScheduledFuture.isDone()) {
+        if (heartbeatScheduledFuture != null && !heartbeatScheduledFuture.isDone()) {   // 如果心跳任务不为空，且未完成，那么就取消心跳任务
             heartbeatScheduledFuture.cancel(true);
         }
-        heartbeatScheduledFuture = scheduledExecutorService.schedule(new Runnable() {
+        heartbeatScheduledFuture = scheduledExecutorService.schedule(new Runnable() {   // 提交心跳任务
             @Override
             public void run() {
                 startNewHeartbeat();
@@ -720,9 +720,9 @@ public class RaftNode {
     }
 
     // in lock, 开始心跳，对leader有效
-    private void startNewHeartbeat() {
+    private void startNewHeartbeat() {  // 这里应该就是 Leader 节点发送心跳消息
         LOG.debug("start new heartbeat, peers={}", peerMap.keySet());
-        for (final Peer peer : peerMap.values()) {
+        for (final Peer peer : peerMap.values()) {  // 针对每一个节点，提交一个 appendEntries 任务
             executorService.submit(new Runnable() {
                 @Override
                 public void run() {
@@ -730,14 +730,14 @@ public class RaftNode {
                 }
             });
         }
-        resetHeartbeatTimer();
+        resetHeartbeatTimer();  // 重新开始心跳任务
     }
 
     // in lock, for leader
-    private void advanceCommitIndex() {
+    private void advanceCommitIndex() { // 根据各个节点的 matchIndex 来计算得到 commitIndex（超过半数的匹配即可提交），本机执行日志项到 commitIndex，更新 applyIndex
         // 获取quorum matchIndex
-        int peerNum = configuration.getServersList().size();
-        long[] matchIndexes = new long[peerNum];
+        int peerNum = configuration.getServersList().size();    // 节点数
+        long[] matchIndexes = new long[peerNum];    // 保存其它节点的配置日志项索引
         int i = 0;
         for (RaftProto.Server server : configuration.getServersList()) {
             if (server.getServerId() != localServer.getServerId()) {
@@ -745,44 +745,44 @@ public class RaftNode {
                 matchIndexes[i++] = peer.getMatchIndex();
             }
         }
-        matchIndexes[i] = raftLog.getLastLogIndex();
-        Arrays.sort(matchIndexes);
-        long newCommitIndex = matchIndexes[peerNum / 2];
-        LOG.debug("newCommitIndex={}, oldCommitIndex={}", newCommitIndex, commitIndex);
-        if (raftLog.getEntryTerm(newCommitIndex) != currentTerm) {
+        matchIndexes[i] = raftLog.getLastLogIndex();    // 自己的匹配日志项就是日志中的最后一条
+        Arrays.sort(matchIndexes);  // 排序所有匹配的日志项
+        long newCommitIndex = matchIndexes[peerNum / 2];    // 取中间的结果作为全局的提交值
+        LOG.debug("newCommitIndex={}, oldCommitIndex={}", newCommitIndex, commitIndex); // 新的 commitIndex
+        if (raftLog.getEntryTerm(newCommitIndex) != currentTerm) {  // 如果被提交的日志项的任期不是自己的任期，直接返回，可能出现了问题
             LOG.debug("newCommitIndexTerm={}, currentTerm={}",
                     raftLog.getEntryTerm(newCommitIndex), currentTerm);
             return;
         }
 
-        if (commitIndex >= newCommitIndex) {
+        if (commitIndex >= newCommitIndex) {    // 新的提交索引反而比之前的小，直接返回
             return;
         }
         long oldCommitIndex = commitIndex;
-        commitIndex = newCommitIndex;
+        commitIndex = newCommitIndex;   // 更新 commitIndex
         // 同步到状态机
         for (long index = oldCommitIndex + 1; index <= newCommitIndex; index++) {
-            RaftProto.LogEntry entry = raftLog.getEntry(index);
+            RaftProto.LogEntry entry = raftLog.getEntry(index); // 获取日志项
             if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA) {
-                stateMachine.apply(entry.getData().toByteArray());
+                stateMachine.apply(entry.getData().toByteArray());  // 如果是数据类型的日志项，交由状态机执行
             } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {
-                applyConfiguration(entry);
+                applyConfiguration(entry);  // 如果是配置类型的日志项，直接应用
             }
         }
-        lastAppliedIndex = commitIndex;
+        lastAppliedIndex = commitIndex; // 更新 applyIndex
         LOG.debug("commitIndex={} lastAppliedIndex={}", commitIndex, lastAppliedIndex);
         commitIndexCondition.signalAll();
     }
 
-    // in lock
+    // in lock  // 将多条日志项打包到 AppendEntriesRequest 中，返回打包的数量
     private long packEntries(long nextIndex, RaftProto.AppendEntriesRequest.Builder requestBuilder) {
-        long lastIndex = Math.min(raftLog.getLastLogIndex(),
+        long lastIndex = Math.min(raftLog.getLastLogIndex(),    // 本次追加日志项的最大索引（lastIndex），不能超过 raftLog 最后一个日志项
                 nextIndex + raftOptions.getMaxLogEntriesPerRequest() - 1);
         for (long index = nextIndex; index <= lastIndex; index++) {
             RaftProto.LogEntry entry = raftLog.getEntry(index);
-            requestBuilder.addEntries(entry);
+            requestBuilder.addEntries(entry);   // 添加日志项
         }
-        return lastIndex - nextIndex + 1;
+        return lastIndex - nextIndex + 1;   // 返回批量操作的日志项数
     }
 
     private boolean installSnapshot(Peer peer) {

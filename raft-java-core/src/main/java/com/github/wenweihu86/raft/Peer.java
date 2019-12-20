@@ -24,7 +24,7 @@ public class Peer {
         this.server = server;
         this.rpcClient = new RpcClient(new Endpoint(
                 server.getEndpoint().getHost(),
-                server.getEndpoint().getPort()));
+                server.getEndpoint().getPort()));   // 通过 RpcClient 构建 RaftConsensusServiceAsync 的代理类
         raftConsensusServiceAsync = BrpcProxy.getProxy(rpcClient, RaftConsensusServiceAsync.class);
         isCatchUp = false;
     }
@@ -36,7 +36,7 @@ public class Peer {
     public RpcClient getRpcClient() {
         return rpcClient;
     }
-
+    // 获取用于 rpc 通信的 RaftConsensusServiceAsync 代理类
     public RaftConsensusServiceAsync getRaftConsensusServiceAsync() {
         return raftConsensusServiceAsync;
     }
