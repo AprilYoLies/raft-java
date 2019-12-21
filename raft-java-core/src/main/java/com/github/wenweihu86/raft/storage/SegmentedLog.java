@@ -160,38 +160,38 @@ public class SegmentedLog {
         }
         return newLastLogIndex;
     }
-
-    public void truncatePrefix(long newFirstIndex) {
-        if (newFirstIndex <= getFirstLogIndex()) {
+    // 根据快照的结果，删除 newFirstIndex 之前的过期日志项，然后更新日志的元数据信息
+    public void truncatePrefix(long newFirstIndex) {    // 删除参数之前的全部日志项
+        if (newFirstIndex <= getFirstLogIndex()) {  // 如果参数不满足删除的条件，直接返回
             return;
         }
-        long oldFirstIndex = getFirstLogIndex();
+        long oldFirstIndex = getFirstLogIndex();    // 首条日志项
         while (!startLogIndexSegmentMap.isEmpty()) {
-            Segment segment = startLogIndexSegmentMap.firstEntry().getValue();
-            if (segment.isCanWrite()) {
+            Segment segment = startLogIndexSegmentMap.firstEntry().getValue();  // 日志段和首条日志项索引的映射
+            if (segment.isCanWrite()) { // 如果日志段索引可写，直接 break，就是找打了可以写入的日志段文件了
                 break;
             }
-            if (newFirstIndex > segment.getEndIndex()) {
-                File oldFile = new File(logDataDir + File.separator + segment.getFileName());
+            if (newFirstIndex > segment.getEndIndex()) {    // 如果该日志段文件是过期的
+                File oldFile = new File(logDataDir + File.separator + segment.getFileName());   // 获取对应日志段的文件
                 try {
-                    RaftFileUtils.closeFile(segment.getRandomAccessFile());
-                    FileUtils.forceDelete(oldFile);
-                    totalSize -= segment.getFileSize();
-                    startLogIndexSegmentMap.remove(segment.getStartIndex());
+                    RaftFileUtils.closeFile(segment.getRandomAccessFile()); // 关闭日志段文件
+                    FileUtils.forceDelete(oldFile); // 删除过期的日志段文件
+                    totalSize -= segment.getFileSize(); // 更新日志文件大小
+                    startLogIndexSegmentMap.remove(segment.getStartIndex());    // 从日志段和首条日志项索引的映射中删除当前日志段的信息
                 } catch (Exception ex2) {
                     LOG.warn("delete file exception:", ex2);
                 }
             } else {
-                break;
+                break;  // 执行到这里说明找到了包含未过期的日志项的日志段
             }
         }
         long newActualFirstIndex;
         if (startLogIndexSegmentMap.size() == 0) {
-            newActualFirstIndex = newFirstIndex;
+            newActualFirstIndex = newFirstIndex;    // 更新新的日志中第一条日志项的索引
         } else {
             newActualFirstIndex = startLogIndexSegmentMap.firstKey();
         }
-        updateMetaData(null, null, newActualFirstIndex);
+        updateMetaData(null, null, newActualFirstIndex);    // 更新元数据信息（日志的元数据信息）
         LOG.info("Truncating log from old first index {} to new first index {}",
                 oldFirstIndex, newActualFirstIndex);
     }

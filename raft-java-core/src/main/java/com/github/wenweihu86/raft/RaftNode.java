@@ -294,72 +294,72 @@ public class RaftNode {
         }
     }
 
-    // in lock
+    // in lock 判断参数是否合理，然后重置一些状态信息，更新自己的身份为 Follower，终止心跳任务，重置选举定时器
     public void stepDown(long newTerm) {
-        if (currentTerm > newTerm) {
+        if (currentTerm > newTerm) {    // 参数检查，如果自己的任期比较高，那么就不能执行 stepDown
             LOG.error("can't be happened");
             return;
         }
-        if (currentTerm < newTerm) {
-            currentTerm = newTerm;
-            leaderId = 0;
-            votedFor = 0;
-            raftLog.updateMetaData(currentTerm, votedFor, null);
+        if (currentTerm < newTerm) {    // 如果当前任期比它人的低
+            currentTerm = newTerm;  // 更新自己的任期为跟它人一样
+            leaderId = 0;   // 重置 Leader
+            votedFor = 0;   // 重置投票结果
+            raftLog.updateMetaData(currentTerm, votedFor, null);    // 更新元数据信息
         }
-        state = NodeState.STATE_FOLLOWER;
+        state = NodeState.STATE_FOLLOWER;   // 更新当前状态为 Follower
         // stop heartbeat
         if (heartbeatScheduledFuture != null && !heartbeatScheduledFuture.isDone()) {
-            heartbeatScheduledFuture.cancel(true);
+            heartbeatScheduledFuture.cancel(true);  // 终止定时的心跳任务
         }
-        resetElectionTimer();
+        resetElectionTimer();   // 重置选举定时器
     }
-
+    // 拍快照，检查当前是否满足拍快照的条件，拍快照，然后将结果替换原快照的内容，然后重新载入快照元信息，并删除过期的日志项
     public void takeSnapshot() {
-        if (snapshot.getIsInstallSnapshot().get()) {
+        if (snapshot.getIsInstallSnapshot().get()) {    // 如果正在安装快照，忽略拍快照
             LOG.info("already in install snapshot, ignore take snapshot");
             return;
         }
 
-        snapshot.getIsTakeSnapshot().compareAndSet(false, true);
+        snapshot.getIsTakeSnapshot().compareAndSet(false, true);    // 设置正在拍快照
         try {
             long localLastAppliedIndex;
             long lastAppliedTerm = 0;
-            RaftProto.Configuration.Builder localConfiguration = RaftProto.Configuration.newBuilder();
+            RaftProto.Configuration.Builder localConfiguration = RaftProto.Configuration.newBuilder();  // 构建 Configuration
             lock.lock();
             try {
-                if (raftLog.getTotalSize() < raftOptions.getSnapshotMinLogSize()) {
-                    return;
+                if (raftLog.getTotalSize() < raftOptions.getSnapshotMinLogSize()) { // 如果日志的总大小没达到拍快照的门槛
+                    return; // 直接返回
                 }
                 if (lastAppliedIndex <= snapshot.getMetaData().getLastIncludedIndex()) {
-                    return;
+                    return; // 如果 applyIndex 还没将快照执行完，直接返回
                 }
                 localLastAppliedIndex = lastAppliedIndex;
                 if (lastAppliedIndex >= raftLog.getFirstLogIndex()
                         && lastAppliedIndex <= raftLog.getLastLogIndex()) {
-                    lastAppliedTerm = raftLog.getEntryTerm(lastAppliedIndex);
+                    lastAppliedTerm = raftLog.getEntryTerm(lastAppliedIndex);   // 获取当前 applyIndex 日志项的任期号
                 }
-                localConfiguration.mergeFrom(configuration);
+                localConfiguration.mergeFrom(configuration);    // 配置信息的合并
             } finally {
                 lock.unlock();
             }
 
             boolean success = false;
-            snapshot.getLock().lock();
+            snapshot.getLock().lock();  // 获取拍快照的锁
             try {
                 LOG.info("start taking snapshot");
                 // take snapshot
-                String tmpSnapshotDir = snapshot.getSnapshotDir() + ".tmp";
-                snapshot.updateMetaData(tmpSnapshotDir, localLastAppliedIndex,
-                        lastAppliedTerm, localConfiguration.build());
-                String tmpSnapshotDataDir = tmpSnapshotDir + File.separator + "data";
-                stateMachine.writeSnapshot(tmpSnapshotDataDir);
+                String tmpSnapshotDir = snapshot.getSnapshotDir() + ".tmp"; // 临时快照文件路径
+                snapshot.updateMetaData(tmpSnapshotDir, localLastAppliedIndex,  // 即将最后包含的日志项索引、日志项任期、集群节点信息保存到快照元数据文件中
+                        lastAppliedTerm, localConfiguration.build());   // 更新 snapshot 元数据信息
+                String tmpSnapshotDataDir = tmpSnapshotDir + File.separator + "data";   // 元数据数据文件夹
+                stateMachine.writeSnapshot(tmpSnapshotDataDir); // 创建 RocksDB 的快照，然后将结果保存到快照目录
                 // rename tmp snapshot dir to snapshot dir
                 try {
-                    File snapshotDirFile = new File(snapshot.getSnapshotDir());
+                    File snapshotDirFile = new File(snapshot.getSnapshotDir()); // 快照文件夹
                     if (snapshotDirFile.exists()) {
-                        FileUtils.deleteDirectory(snapshotDirFile);
+                        FileUtils.deleteDirectory(snapshotDirFile); // 如果快照文件夹存在，删除快照文件夹
                     }
-                    FileUtils.moveDirectory(new File(tmpSnapshotDir),
+                    FileUtils.moveDirectory(new File(tmpSnapshotDir),   // 重命名快照文件夹
                             new File(snapshot.getSnapshotDir()));
                     LOG.info("end taking snapshot, result=success");
                     success = true;
@@ -373,26 +373,26 @@ public class RaftNode {
             if (success) {
                 // 重新加载snapshot
                 long lastSnapshotIndex = 0;
-                snapshot.getLock().lock();
+                snapshot.getLock().lock();  // 获取快照锁
                 try {
-                    snapshot.reload();
-                    lastSnapshotIndex = snapshot.getMetaData().getLastIncludedIndex();
+                    snapshot.reload();  // 尝试从本地获取快照元数据，没有的话就构建一个
+                    lastSnapshotIndex = snapshot.getMetaData().getLastIncludedIndex();  // 获取当前快照的最后一个日志项索引
                 } finally {
                     snapshot.getLock().unlock();
                 }
 
                 // discard old log entries
                 lock.lock();
-                try {
+                try {   // 如果快照的最后日志项索引位于日志的第一条日志项之前，删除之前的日志项
                     if (lastSnapshotIndex > 0 && raftLog.getFirstLogIndex() <= lastSnapshotIndex) {
-                        raftLog.truncatePrefix(lastSnapshotIndex + 1);
+                        raftLog.truncatePrefix(lastSnapshotIndex + 1);  // 删除之前的日志项，根据快照的结果，删除 newFirstIndex 之前的过期日志项，然后更新日志的元数据信息
                     }
                 } finally {
                     lock.unlock();
                 }
             }
         } finally {
-            snapshot.getIsTakeSnapshot().compareAndSet(true, false);
+            snapshot.getIsTakeSnapshot().compareAndSet(true, false);    // 将正在拍快照的状态修改为 false
         }
     }
 
@@ -685,7 +685,7 @@ public class RaftNode {
         }
 
         @Override
-        public void fail(Throwable e) {
+        public void fail(Throwable e) { // 如果投票的响应结果为 false，直接进行日志打印
             LOG.warn("requestVote with peer[{}:{}] failed",
                     peer.getServer().getEndpoint().getHost(),
                     peer.getServer().getEndpoint().getPort());
@@ -784,53 +784,53 @@ public class RaftNode {
         }
         return lastIndex - nextIndex + 1;   // 返回批量操作的日志项数
     }
-
+    // 向其它节点安装快照
     private boolean installSnapshot(Peer peer) {
-        if (snapshot.getIsTakeSnapshot().get()) {
+        if (snapshot.getIsTakeSnapshot().get()) {   // 如果当前正在拍快照，那么就不能进行安装快照的操作
             LOG.info("already in take snapshot, please send install snapshot request later");
             return false;
         }
         if (!snapshot.getIsInstallSnapshot().compareAndSet(false, true)) {
-            LOG.info("already in install snapshot");
+            LOG.info("already in install snapshot");    // 更新正在安装快照的标志，标记为正在安装快照，避免重复操作
             return false;
         }
-
+        // 开始发送安装快照请求到其它节点
         LOG.info("begin send install snapshot request to server={}", peer.getServer().getServerId());
-        boolean isSuccess = true;
+        boolean isSuccess = true;   // 将快照目录下的文件全部包装为 SnapshotDataFile 通过 map 容器返回
         TreeMap<String, Snapshot.SnapshotDataFile> snapshotDataFileMap = snapshot.openSnapshotDataFiles();
-        LOG.info("total snapshot files={}", snapshotDataFileMap.keySet());
+        LOG.info("total snapshot files={}", snapshotDataFileMap.keySet());  // 统计快照文件的数目
         try {
             boolean isLastRequest = false;
             String lastFileName = null;
             long lastOffset = 0;
             long lastLength = 0;
-            while (!isLastRequest) {
+            while (!isLastRequest) {    // 构建 InstallSnapshotRequest，需要根据上一次操作的结果来决定本次请求的内容，比如数据长度，是否是第一或最后一个文件块
                 RaftProto.InstallSnapshotRequest request
                         = buildInstallSnapshotRequest(snapshotDataFileMap, lastFileName, lastOffset, lastLength);
-                if (request == null) {
+                if (request == null) {  // 如果构建的 InstallSnapshotRequest 为空
                     LOG.warn("snapshot request == null");
-                    isSuccess = false;
+                    isSuccess = false;  // 标记本次的操作失败
                     break;
                 }
-                if (request.getIsLast()) {
-                    isLastRequest = true;
-                }
+                if (request.getIsLast()) {  // 判断是否是最后一个文件块了
+                    isLastRequest = true;   // 标记是最后一个文件块了
+                }   // 内容包括 fileName、offset、size、isFirst、isLast
                 LOG.info("install snapshot request, fileName={}, offset={}, size={}, isFirst={}, isLast={}",
                         request.getFileName(), request.getOffset(), request.getData().toByteArray().length,
                         request.getIsFirst(), request.getIsLast());
-                RaftProto.InstallSnapshotResponse response
+                RaftProto.InstallSnapshotResponse response  // 发送 InstallSnapshotRequest
                         = peer.getRaftConsensusServiceAsync().installSnapshot(request);
-                if (response != null && response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {
-                    lastFileName = request.getFileName();
-                    lastOffset = request.getOffset();
-                    lastLength = request.getData().size();
-                } else {
+                if (response != null && response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {  // 如果安装快照的操作成功
+                    lastFileName = request.getFileName();   // 上一次操作的文件名
+                    lastOffset = request.getOffset();   // 上一次操作的偏移量
+                    lastLength = request.getData().size();  // 上一次操作的数据长度
+                } else {    // 失败后直接 break
                     isSuccess = false;
                     break;
                 }
             }
 
-            if (isSuccess) {
+            if (isSuccess) {    // 如果安装快照成功
                 long lastIncludedIndexInSnapshot;
                 snapshot.getLock().lock();
                 try {
@@ -841,75 +841,75 @@ public class RaftNode {
 
                 lock.lock();
                 try {
-                    peer.setNextIndex(lastIncludedIndexInSnapshot + 1);
+                    peer.setNextIndex(lastIncludedIndexInSnapshot + 1); // 更新 peer 的 nextIndex 值
                 } finally {
                     lock.unlock();
                 }
             }
         } finally {
-            snapshot.closeSnapshotDataFiles(snapshotDataFileMap);
-            snapshot.getIsInstallSnapshot().compareAndSet(true, false);
+            snapshot.closeSnapshotDataFiles(snapshotDataFileMap);   // 将打开的每个快照文件关闭
+            snapshot.getIsInstallSnapshot().compareAndSet(true, false); // 更新当前的状态为不在安装快照
         }
         LOG.info("end send install snapshot request to server={}, success={}",
                 peer.getServer().getServerId(), isSuccess);
         return isSuccess;
     }
-
+    // 构建 InstallSnapshotRequest，需要根据上一次操作的结果来决定本次请求的内容，比如数据长度，是否是第一或最后一个文件块
     private RaftProto.InstallSnapshotRequest buildInstallSnapshotRequest(
             TreeMap<String, Snapshot.SnapshotDataFile> snapshotDataFileMap,
             String lastFileName, long lastOffset, long lastLength) {
         RaftProto.InstallSnapshotRequest.Builder requestBuilder = RaftProto.InstallSnapshotRequest.newBuilder();
 
-        snapshot.getLock().lock();
+        snapshot.getLock().lock();  // 快照锁
         try {
-            if (lastFileName == null) {
-                lastFileName = snapshotDataFileMap.firstKey();
-                lastOffset = 0;
-                lastLength = 0;
+            if (lastFileName == null) { // 上一条处理的快照文件为空
+                lastFileName = snapshotDataFileMap.firstKey();  // 拿到第一个快照文件对应的 key
+                lastOffset = 0; // 偏移量为 0
+                lastLength = 0; // 上一次处理的文件长度也为 0
             }
-            Snapshot.SnapshotDataFile lastFile = snapshotDataFileMap.get(lastFileName);
-            long lastFileLength = lastFile.randomAccessFile.length();
-            String currentFileName = lastFileName;
-            long currentOffset = lastOffset + lastLength;
-            int currentDataSize = raftOptions.getMaxSnapshotBytesPerRequest();
-            Snapshot.SnapshotDataFile currentDataFile = lastFile;
-            if (lastOffset + lastLength < lastFileLength) {
-                if (lastOffset + lastLength + raftOptions.getMaxSnapshotBytesPerRequest() > lastFileLength) {
-                    currentDataSize = (int) (lastFileLength - (lastOffset + lastLength));
+            Snapshot.SnapshotDataFile lastFile = snapshotDataFileMap.get(lastFileName); // 拿到快照文件对应的 SnapshotDataFile
+            long lastFileLength = lastFile.randomAccessFile.length();   // 数据的长度
+            String currentFileName = lastFileName;  // 当前文件名
+            long currentOffset = lastOffset + lastLength;   // 当前偏移量
+            int currentDataSize = raftOptions.getMaxSnapshotBytesPerRequest();  // 每次请求的最大快照大小
+            Snapshot.SnapshotDataFile currentDataFile = lastFile;   // 当前文件
+            if (lastOffset + lastLength < lastFileLength) { // 如果上一次的偏移量加上一次的长度没有超过文件数据长度
+                if (lastOffset + lastLength + raftOptions.getMaxSnapshotBytesPerRequest() > lastFileLength) {   // 如果本次操作的数据会超过文件的长度
+                    currentDataSize = (int) (lastFileLength - (lastOffset + lastLength));   // 避免超过每次请求的数据上限
                 }
-            } else {
+            } else {    // 执行到这里，说明上一次的读取操作已经将当前文件读完了，需要转到下一个文件进行读取
                 Map.Entry<String, Snapshot.SnapshotDataFile> currentEntry
-                        = snapshotDataFileMap.higherEntry(lastFileName);
-                if (currentEntry == null) {
+                        = snapshotDataFileMap.higherEntry(lastFileName);    // 下一个快照文件
+                if (currentEntry == null) { // 没有下一个文件了
                     LOG.warn("reach the last file={}", lastFileName);
                     return null;
                 }
-                currentDataFile = currentEntry.getValue();
-                currentFileName = currentEntry.getKey();
+                currentDataFile = currentEntry.getValue();  // 下一个文件
+                currentFileName = currentEntry.getKey();    // 下一个文件名
                 currentOffset = 0;
-                int currentFileLenght = (int) currentEntry.getValue().randomAccessFile.length();
-                if (currentFileLenght < raftOptions.getMaxSnapshotBytesPerRequest()) {
-                    currentDataSize = currentFileLenght;
+                int currentFileLenght = (int) currentEntry.getValue().randomAccessFile.length();    // 下一个文件的长度
+                if (currentFileLenght < raftOptions.getMaxSnapshotBytesPerRequest()) {  // 文件长度没有超过每次请求的最大快照长度
+                    currentDataSize = currentFileLenght;    // 当前数据长度就是文件的数据长度
                 }
             }
-            byte[] currentData = new byte[currentDataSize];
-            currentDataFile.randomAccessFile.seek(currentOffset);
-            currentDataFile.randomAccessFile.read(currentData);
-            requestBuilder.setData(ByteString.copyFrom(currentData));
-            requestBuilder.setFileName(currentFileName);
-            requestBuilder.setOffset(currentOffset);
-            requestBuilder.setIsFirst(false);
-            if (currentFileName.equals(snapshotDataFileMap.lastKey())
+            byte[] currentData = new byte[currentDataSize]; // 构建存储数据的字节数组
+            currentDataFile.randomAccessFile.seek(currentOffset);   // 偏移量
+            currentDataFile.randomAccessFile.read(currentData); // 读取长度
+            requestBuilder.setData(ByteString.copyFrom(currentData));   // 请求的数据
+            requestBuilder.setFileName(currentFileName);    // 当前的文件名
+            requestBuilder.setOffset(currentOffset);    // 当前的偏移量
+            requestBuilder.setIsFirst(false);   // 初始化为不是第一个文件块
+            if (currentFileName.equals(snapshotDataFileMap.lastKey())   // 如果正在处理最后一个快照文件且处理的数据已经超过了文件的长度
                     && currentOffset + currentDataSize >= currentDataFile.randomAccessFile.length()) {
-                requestBuilder.setIsLast(true);
+                requestBuilder.setIsLast(true); // 标记这是最后一个文件块了
             } else {
-                requestBuilder.setIsLast(false);
+                requestBuilder.setIsLast(false);    // 否则不是最后一个文件块
             }
-            if (currentFileName.equals(snapshotDataFileMap.firstKey()) && currentOffset == 0) {
-                requestBuilder.setIsFirst(true);
-                requestBuilder.setSnapshotMetaData(snapshot.getMetaData());
+            if (currentFileName.equals(snapshotDataFileMap.firstKey()) && currentOffset == 0) { // 如果正在处理第一个文件，且偏移量为 0
+                requestBuilder.setIsFirst(true);    // 标记这是第一个文件块
+                requestBuilder.setSnapshotMetaData(snapshot.getMetaData()); // 第一个文件块的 InstallSnapshotRequest 中需要包含快照的元数据
             } else {
-                requestBuilder.setIsFirst(false);
+                requestBuilder.setIsFirst(false);   // 否则标记不是第一个文件块
             }
         } catch (Exception ex) {
             LOG.warn("meet exception:", ex);
@@ -920,8 +920,8 @@ public class RaftNode {
 
         lock.lock();
         try {
-            requestBuilder.setTerm(currentTerm);
-            requestBuilder.setServerId(localServer.getServerId());
+            requestBuilder.setTerm(currentTerm);    // 设置任期信息
+            requestBuilder.setServerId(localServer.getServerId());  // 设置自己的唯一标识符
         } finally {
             lock.unlock();
         }

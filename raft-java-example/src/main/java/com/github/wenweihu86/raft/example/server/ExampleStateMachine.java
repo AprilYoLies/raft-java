@@ -30,11 +30,11 @@ public class ExampleStateMachine implements StateMachine {
         this.raftDataDir = raftDataDir;
     }
 
-    @Override
+    @Override   // 创建 RocksDB 的快照，然后将结果保存到快照目录
     public void writeSnapshot(String snapshotDir) {
-        Checkpoint checkpoint = Checkpoint.create(db);
+        Checkpoint checkpoint = Checkpoint.create(db);  // 创建检查点
         try {
-            checkpoint.createCheckpoint(snapshotDir);
+            checkpoint.createCheckpoint(snapshotDir);   // 将检查点之前的数据保存到快照数据文件夹
         } catch (Exception ex) {
             ex.printStackTrace();
             LOG.warn("writeSnapshot meet exception, dir={}, msg={}",
@@ -68,7 +68,7 @@ public class ExampleStateMachine implements StateMachine {
     }
 
     @Override
-    public void apply(byte[] dataBytes) {
+    public void apply(byte[] dataBytes) {   // 仅仅是将 key value 保存至 RocksDB 中
         try {
             ExampleProto.SetRequest request = ExampleProto.SetRequest.parseFrom(dataBytes);
             db.put(request.getKey().getBytes(), request.getValue().getBytes());
@@ -76,7 +76,7 @@ public class ExampleStateMachine implements StateMachine {
             LOG.warn("meet exception, msg={}", ex.getMessage());
         }
     }
-
+    // 仅仅是根据 key 值获取 RocksDB 中的值，通过 GetResponse 返回
     public ExampleProto.GetResponse get(ExampleProto.GetRequest request) {
         try {
             ExampleProto.GetResponse.Builder responseBuilder = ExampleProto.GetResponse.newBuilder();

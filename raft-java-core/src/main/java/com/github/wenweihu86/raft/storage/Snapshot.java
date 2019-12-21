@@ -58,21 +58,21 @@ public class Snapshot {
      * 打开snapshot data目录下的文件，
      * 如果是软链接，需要打开实际文件句柄
      * @return 文件名以及文件句柄map
-     */
+     */ // 将快照目录下的文件全部包装为 SnapshotDataFile 通过 map 容器返回
     public TreeMap<String, SnapshotDataFile> openSnapshotDataFiles() {
-        TreeMap<String, SnapshotDataFile> snapshotDataFileMap = new TreeMap<>();
-        String snapshotDataDir = snapshotDir + File.separator + "data";
+        TreeMap<String, SnapshotDataFile> snapshotDataFileMap = new TreeMap<>();    // 快照数据文件 map
+        String snapshotDataDir = snapshotDir + File.separator + "data"; // 快照数据文件夹
         try {
-            Path snapshotDataPath = FileSystems.getDefault().getPath(snapshotDataDir);
+            Path snapshotDataPath = FileSystems.getDefault().getPath(snapshotDataDir);  // 快照数据路径
             snapshotDataPath = snapshotDataPath.toRealPath();
-            snapshotDataDir = snapshotDataPath.toString();
-            List<String> fileNames = RaftFileUtils.getSortedFilesInDirectory(snapshotDataDir, snapshotDataDir);
+            snapshotDataDir = snapshotDataPath.toString();  // 真实的快照数据路径
+            List<String> fileNames = RaftFileUtils.getSortedFilesInDirectory(snapshotDataDir, snapshotDataDir); // 获取目录下的全部文件，排序后返回
             for (String fileName : fileNames) {
-                RandomAccessFile randomAccessFile = RaftFileUtils.openFile(snapshotDataDir, fileName, "r");
-                SnapshotDataFile snapshotFile = new SnapshotDataFile();
-                snapshotFile.fileName = fileName;
-                snapshotFile.randomAccessFile = randomAccessFile;
-                snapshotDataFileMap.put(fileName, snapshotFile);
+                RandomAccessFile randomAccessFile = RaftFileUtils.openFile(snapshotDataDir, fileName, "r"); // 打开文件
+                SnapshotDataFile snapshotFile = new SnapshotDataFile(); // 创建 SnapshotDataFile
+                snapshotFile.fileName = fileName;   // 保存文件名到 SnapshotDataFile
+                snapshotFile.randomAccessFile = randomAccessFile;   // 保存 file 到 SnapshotDataFile
+                snapshotDataFileMap.put(fileName, snapshotFile);    // 将 SnapshotDataFile 保存到 map 中
             }
         } catch (IOException ex) {
             LOG.warn("readSnapshotDataFiles exception:", ex);
@@ -80,7 +80,7 @@ public class Snapshot {
         }
         return snapshotDataFileMap;
     }
-
+    // 将打开的每个快照文件关闭
     public void closeSnapshotDataFiles(TreeMap<String, SnapshotDataFile> snapshotDataFileMap) {
         for (Map.Entry<String, SnapshotDataFile> entry : snapshotDataFileMap.entrySet()) {
             try {
@@ -103,30 +103,30 @@ public class Snapshot {
             return null;
         }
     }
-
+    // 即将最后包含的日志项索引、日志项任期、集群节点信息保存到快照元数据文件中
     public void updateMetaData(String dir,
                                Long lastIncludedIndex,
                                Long lastIncludedTerm,
                                RaftProto.Configuration configuration) {
-        RaftProto.SnapshotMetaData snapshotMetaData = RaftProto.SnapshotMetaData.newBuilder()
-                .setLastIncludedIndex(lastIncludedIndex)
-                .setLastIncludedTerm(lastIncludedTerm)
-                .setConfiguration(configuration).build();
-        String snapshotMetaFile = dir + File.separator + "metadata";
+        RaftProto.SnapshotMetaData snapshotMetaData = RaftProto.SnapshotMetaData.newBuilder()   // 构建 SnapshotMetaData
+                .setLastIncludedIndex(lastIncludedIndex)    // 最后包含的日志项索引
+                .setLastIncludedTerm(lastIncludedTerm)  // 最后包含的日志项的任期号
+                .setConfiguration(configuration).build();   // 配置信息（里边就是集群节点的信息）
+        String snapshotMetaFile = dir + File.separator + "metadata";    // 快照元文件
         RandomAccessFile randomAccessFile = null;
         try {
-            File dirFile = new File(dir);
+            File dirFile = new File(dir);   // 创建日志快照元文件的文件夹
             if (!dirFile.exists()) {
                 dirFile.mkdirs();
             }
 
-            File file = new File(snapshotMetaFile);
+            File file = new File(snapshotMetaFile); // 在快照文件夹下创建快照元文件
             if (file.exists()) {
                 FileUtils.forceDelete(file);
             }
             file.createNewFile();
             randomAccessFile = new RandomAccessFile(file, "rw");
-            RaftFileUtils.writeProtoToFile(randomAccessFile, snapshotMetaData);
+            RaftFileUtils.writeProtoToFile(randomAccessFile, snapshotMetaData); // 将快照元数据信息写入快照元数据文件
         } catch (IOException ex) {
             LOG.warn("meta file not exist, name={}", snapshotMetaFile);
         } finally {

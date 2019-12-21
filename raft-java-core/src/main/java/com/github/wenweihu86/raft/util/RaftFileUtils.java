@@ -17,23 +17,23 @@ public class RaftFileUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftFileUtils.class);
     // 列出 /Users/eva/IdeaProjects/raft-java/raft-java-example/data/log/data 下边的全部文件
-    public static List<String> getSortedFilesInDirectory(
+    public static List<String> getSortedFilesInDirectory(   // 获取目录下的全部文件，排序后返回
             String dirName, String rootDirName) throws IOException {
         List<String> fileList = new ArrayList<>();
-        File rootDir = new File(rootDirName);
-        File dir = new File(dirName);
+        File rootDir = new File(rootDirName);   // 根文件夹
+        File dir = new File(dirName);   // 文件夹名
         if (!rootDir.isDirectory() || !dir.isDirectory()) {
-            return fileList;
+            return fileList;    // 如果两个参数都不是目录，直接返回空 list
         }
-        String rootPath = rootDir.getCanonicalPath();
+        String rootPath = rootDir.getCanonicalPath();   // 权威路径
         if (!rootPath.endsWith("/")) {
-            rootPath = rootPath + "/";
+            rootPath = rootPath + "/";  // 补上路径分隔符
         }
-        File[] files = dir.listFiles();
+        File[] files = dir.listFiles(); // 列出下边的全部文件
         for (File file : files) {
-            if (file.isDirectory()) {
+            if (file.isDirectory()) {   // 递归列出下边的文件
                 fileList.addAll(getSortedFilesInDirectory(file.getCanonicalPath(), rootPath));
-            } else {
+            } else {    // 将文件添加到文件 list 中
                 fileList.add(file.getCanonicalPath().substring(rootPath.length()));
             }
         }
