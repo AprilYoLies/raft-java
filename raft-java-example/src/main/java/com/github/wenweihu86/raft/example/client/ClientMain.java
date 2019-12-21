@@ -25,20 +25,20 @@ public class ClientMain {
         }
 
         // init rpc client
-        RpcClient rpcClient = new RpcClient(ipPorts);
-        ExampleService exampleService = BrpcProxy.getProxy(rpcClient, ExampleService.class);
+        RpcClient rpcClient = new RpcClient(ipPorts);   // 构建 rpc 客户端
+        ExampleService exampleService = BrpcProxy.getProxy(rpcClient, ExampleService.class);    // 获取对应的代理类
         final JsonFormat jsonFormat = new JsonFormat();
 
         // set
         if (value != null) {
-            ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()
+            ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()   // 构建对应的GET请求消息
                     .setKey(key).setValue(value).build();
             ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
             System.out.printf("set request, key=%s value=%s response=%s\n",
                     key, value, jsonFormat.printToString(setResponse));
         } else {
             // get
-            ExampleProto.GetRequest getRequest = ExampleProto.GetRequest.newBuilder()
+            ExampleProto.GetRequest getRequest = ExampleProto.GetRequest.newBuilder()   // 构建对应的PUT请求消息
                     .setKey(key).build();
             ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
             System.out.printf("get request, key=%s, response=%s\n",

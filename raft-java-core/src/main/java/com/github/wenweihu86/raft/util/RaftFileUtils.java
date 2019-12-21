@@ -110,14 +110,14 @@ public class RaftFileUtils {
             return null;
         }
     }
-
+    // 将数据段按照一定的协议写入文件中
     public static  <T extends Message> void writeProtoToFile(RandomAccessFile raf, T message) {
-        byte[] messageBytes = message.toByteArray();
-        long crc32 = getCRC32(messageBytes);
+        byte[] messageBytes = message.toByteArray();    // 消息转换为字节数组
+        long crc32 = getCRC32(messageBytes);    // 得到 crc32 校验结果
         try {
-            raf.writeLong(crc32);
-            raf.writeInt(messageBytes.length);
-            raf.write(messageBytes);
+            raf.writeLong(crc32);   // 先写校验结果
+            raf.writeInt(messageBytes.length);  // 再写数据长度
+            raf.write(messageBytes);    // 最后写真正的数据内容
         } catch (IOException ex) {
             LOG.warn("write proto to file error, msg={}", ex.getMessage());
             throw new RuntimeException("write proto to file error");

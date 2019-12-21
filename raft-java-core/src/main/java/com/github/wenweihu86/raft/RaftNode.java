@@ -123,44 +123,44 @@ public class RaftNode {
         }
 
         // init thread pool
-        executorService = new ThreadPoolExecutor(
+        executorService = new ThreadPoolExecutor(   // 构建一个必要的线程池
                 raftOptions.getRaftConsensusThreadNum(),
                 raftOptions.getRaftConsensusThreadNum(),
                 60,
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>());
-        scheduledExecutorService = Executors.newScheduledThreadPool(2);
-        scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
+        scheduledExecutorService = Executors.newScheduledThreadPool(2); // 构建一个定时任务
+        scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {    // 提交一个定时快照任务
             @Override
             public void run() {
                 takeSnapshot();
             }
         }, raftOptions.getSnapshotPeriodSeconds(), raftOptions.getSnapshotPeriodSeconds(), TimeUnit.SECONDS);
         // start election
-        resetElectionTimer();
+        resetElectionTimer();   // 开启 Leader 竞选流程
     }
 
-    // client set command
+    // client set command 将待写入的数据构建为 LogEntry，然后批量追加到日志文件中，最后等待日志项被应用，返回日志项应用的结果
     public boolean replicate(byte[] data, RaftProto.EntryType entryType) {
         lock.lock();
         long newLastLogIndex = 0;
         try {
-            if (state != NodeState.STATE_LEADER) {
+            if (state != NodeState.STATE_LEADER) {  // 只有 Leader 才有资格进行日志复制的操作
                 LOG.debug("I'm not the leader");
                 return false;
             }
-            RaftProto.LogEntry logEntry = RaftProto.LogEntry.newBuilder()
-                    .setTerm(currentTerm)
-                    .setType(entryType)
-                    .setData(ByteString.copyFrom(data)).build();
+            RaftProto.LogEntry logEntry = RaftProto.LogEntry.newBuilder()   // 构建日志项任务
+                    .setTerm(currentTerm)   // 设置任期
+                    .setType(entryType) // 设置消息类型
+                    .setData(ByteString.copyFrom(data)).build();    // 将数据填充到 LogEntry 中
             List<RaftProto.LogEntry> entries = new ArrayList<>();
-            entries.add(logEntry);
-            newLastLogIndex = raftLog.append(entries);
+            entries.add(logEntry);  // list 装 LogEntry
+            newLastLogIndex = raftLog.append(entries);  // 判断是否需要新的日志段文件，然后将日志项写入到日志段文件中，更新对应的记录信息，返回写入后新的 LastLogIndex
+            // 创建元数据文件，将元数据信息写入元数据文件中 currentTerm=18, votedFor=2, firstLogIndex=1
             raftLog.updateMetaData(currentTerm, null, raftLog.getFirstLogIndex());
-
             for (RaftProto.Server server : configuration.getServersList()) {
                 final Peer peer = peerMap.get(server.getServerId());
-                executorService.submit(new Runnable() {
+                executorService.submit(new Runnable() { // 向其它节点提交追加日志项的任务
                     @Override
                     public void run() {
                         appendEntries(peer);
@@ -168,17 +168,17 @@ public class RaftNode {
                 });
             }
 
-            if (raftOptions.isAsyncWrite()) {
+            if (raftOptions.isAsyncWrite()) {   // 如果是异步写入，那么主节点写入成功后即可返回（可能会存在安全问题）
                 // 主节点写成功后，就返回。
                 return true;
             }
 
             // sync wait commitIndex >= newLastLogIndex
-            long startTime = System.currentTimeMillis();
-            while (lastAppliedIndex < newLastLogIndex) {
+            long startTime = System.currentTimeMillis();    // 当前时间戳
+            while (lastAppliedIndex < newLastLogIndex) {    // 所以这里退出循环的条件是 applyIndex 追赶上 commitIndex 或者等待超时
                 if (System.currentTimeMillis() - startTime >= raftOptions.getMaxAwaitTimeout()) {
-                    break;
-                }
+                    break;  // 超过等待时间，直接 break
+                }   // 等待日志项被执行
                 commitIndexCondition.await(raftOptions.getMaxAwaitTimeout(), TimeUnit.MILLISECONDS);
             }
         } catch (Exception ex) {
@@ -187,12 +187,12 @@ public class RaftNode {
             lock.unlock();
         }
         LOG.debug("lastAppliedIndex={} newLastLogIndex={}", lastAppliedIndex, newLastLogIndex);
-        if (lastAppliedIndex < newLastLogIndex) {
+        if (lastAppliedIndex < newLastLogIndex) {   // 如果 applyIndex 还是没有追赶上 commitIndex，那么表示本次的 put 过程失败
             return false;
         }
         return true;
     }
-
+    // 追加日志，先判断是否需要安装快照，然后将必要的信息封装为 AppendEntriesRequest，发送对应的 rpc 请求，如果成功，更新 commitIndex 然后执行对应的日志项
     public void appendEntries(Peer peer) {
         RaftProto.AppendEntriesRequest.Builder requestBuilder = RaftProto.AppendEntriesRequest.newBuilder();    // 构建一个追加日志的消息 Builder
         long prevLogIndex;
@@ -278,11 +278,11 @@ public class RaftNode {
                     if (ConfigurationUtils.containsServer(configuration, peer.getServer().getServerId())) {
                         advanceCommitIndex();   // 根据各个节点的 matchIndex 来计算得到 commitIndex（超过半数的匹配即可提交），本机执行日志项到 commitIndex，更新 applyIndex
                     } else {
-                        if (raftLog.getLastLogIndex() - peer.getMatchIndex() <= raftOptions.getCatchupMargin()) {
+                        if (raftLog.getLastLogIndex() - peer.getMatchIndex() <= raftOptions.getCatchupMargin()) {   // 这里是判断 peer 的日志项是否追赶上 Leader 节点
                             LOG.debug("peer catch up the leader");
-                            peer.setCatchUp(true);
+                            peer.setCatchUp(true);  // 标记 peer 已经追赶上 Leader 节点
                             // signal the caller thread
-                            catchUpCondition.signalAll();
+                            catchUpCondition.signalAll();   // 通知日志追赶的任务
                         }
                     }
                 } else {

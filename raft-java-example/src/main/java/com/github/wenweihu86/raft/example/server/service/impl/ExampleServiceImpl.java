@@ -29,34 +29,34 @@ public class ExampleServiceImpl implements ExampleService {
 
     @Override
     public ExampleProto.SetResponse set(ExampleProto.SetRequest request) {
-        ExampleProto.SetResponse.Builder responseBuilder = ExampleProto.SetResponse.newBuilder();
+        ExampleProto.SetResponse.Builder responseBuilder = ExampleProto.SetResponse.newBuilder();   // 构建对应的 SetResponse
         // 如果自己不是leader，将写请求转发给leader
-        if (raftNode.getLeaderId() <= 0) {
+        if (raftNode.getLeaderId() <= 0) {  // 如果自己不知道 Leader 节点的信息，直接返回请求失败
             responseBuilder.setSuccess(false);
-        } else if (raftNode.getLeaderId() != raftNode.getLocalServer().getServerId()) {
-            RpcClient rpcClient = raftNode.getPeerMap().get(raftNode.getLeaderId()).getRpcClient();
-            ExampleService exampleService = BrpcProxy.getProxy(rpcClient, ExampleService.class);
-            ExampleProto.SetResponse responseFromLeader = exampleService.set(request);
-            responseBuilder.mergeFrom(responseFromLeader);
+        } else if (raftNode.getLeaderId() != raftNode.getLocalServer().getServerId()) { // 如果自己不是 Leader
+            RpcClient rpcClient = raftNode.getPeerMap().get(raftNode.getLeaderId()).getRpcClient(); // 获取和 Leader 通信的客户端
+            ExampleService exampleService = BrpcProxy.getProxy(rpcClient, ExampleService.class);    // 得到对应的代理类
+            ExampleProto.SetResponse responseFromLeader = exampleService.set(request);  // 向 Leader 节点发起请求，得到请求结果
+            responseBuilder.mergeFrom(responseFromLeader);  // 将两个结果合并
         } else {
             // 数据同步写入raft集群
-            byte[] data = request.toByteArray();
-            boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_DATA);
-            responseBuilder.setSuccess(success);
+            byte[] data = request.toByteArray();    // 将请求序列化为字节数组
+            boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_DATA);    // 进行真正的日志项的同步工作，将待写入的数据构建为 LogEntry，然后批量追加到日志文件中，最后等待日志项被应用，返回日志项应用的结果
+            responseBuilder.setSuccess(success);    // 设置写入的结果
         }
 
-        ExampleProto.SetResponse response = responseBuilder.build();
+        ExampleProto.SetResponse response = responseBuilder.build();    // 构建响应结果
         LOG.info("set request, request={}, response={}", jsonFormat.printToString(request),
                 jsonFormat.printToString(response));
-        return response;
+        return response;    // 返回响应结果
     }
 
     @Override
     public ExampleProto.GetResponse get(ExampleProto.GetRequest request) {
-        ExampleProto.GetResponse response = stateMachine.get(request);
+        ExampleProto.GetResponse response = stateMachine.get(request);  // 从状态机中获取执行的结果
         LOG.info("get request, request={}, response={}", jsonFormat.printToString(request),
                 jsonFormat.printToString(response));
-        return response;
+        return response;    // 返回响应
     }
 
 }
