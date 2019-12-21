@@ -66,7 +66,7 @@ public class SegmentedLog {
         Segment segment = startLogIndexSegmentMap.floorEntry(index).getValue();
         return segment.getEntry(index);
     }
-
+    // 获取 index 日志项的任期号
     public long getEntryTerm(long index) {
         RaftProto.LogEntry entry = getEntry(index);
         if (entry == null) {
@@ -195,44 +195,44 @@ public class SegmentedLog {
         LOG.info("Truncating log from old first index {} to new first index {}",
                 oldFirstIndex, newActualFirstIndex);
     }
-
+    // 删除 newEndIndex 之后的日志项，包括 Segment 的 Record list 和日志段文件中内容，更新 Segment 相关的信息，重命名文件
     public void truncateSuffix(long newEndIndex) {
-        if (newEndIndex >= getLastLogIndex()) {
+        if (newEndIndex >= getLastLogIndex()) { // 参数超过了范围，直接返回
             return;
         }
         LOG.info("Truncating log from old end index {} to new end index {}",
                 getLastLogIndex(), newEndIndex);
-        while (!startLogIndexSegmentMap.isEmpty()) {
-            Segment segment = startLogIndexSegmentMap.lastEntry().getValue();
+        while (!startLogIndexSegmentMap.isEmpty()) {    // 如果开始索引和日志段文件映射 map 不为空
+            Segment segment = startLogIndexSegmentMap.lastEntry().getValue();   // 先获取最后一个日志段文件
             try {
-                if (newEndIndex == segment.getEndIndex()) {
-                    break;
-                } else if (newEndIndex < segment.getStartIndex()) {
-                    totalSize -= segment.getFileSize();
+                if (newEndIndex == segment.getEndIndex()) { // 如果正巧最后一个日志段索引就是要砍掉的日志项索引
+                    break;  // 那就不用砍掉了
+                } else if (newEndIndex < segment.getStartIndex()) { // 如果待砍掉的日志项不在当前日志段文件
+                    totalSize -= segment.getFileSize(); // 直接减去整个日志段文件的大小
                     // delete file
-                    segment.getRandomAccessFile().close();
-                    String fullFileName = logDataDir + File.separator + segment.getFileName();
-                    FileUtils.forceDelete(new File(fullFileName));
-                    startLogIndexSegmentMap.remove(segment.getFileName());
-                } else if (newEndIndex < segment.getEndIndex()) {
-                    int i = (int) (newEndIndex + 1 - segment.getStartIndex());
-                    segment.setEndIndex(newEndIndex);
-                    long newFileSize = segment.getEntries().get(i).offset;
-                    totalSize -= (segment.getFileSize() - newFileSize);
-                    segment.setFileSize(newFileSize);
-                    segment.getEntries().removeAll(
+                    segment.getRandomAccessFile().close();  // 关闭当前日志段文件
+                    String fullFileName = logDataDir + File.separator + segment.getFileName();  // 当前日志段文件名
+                    FileUtils.forceDelete(new File(fullFileName));  // 删掉日志段文件
+                    startLogIndexSegmentMap.remove(segment.getFileName());  // 从映射的 map 中移除该日志段
+                } else if (newEndIndex < segment.getEndIndex()) {   // 如果待砍掉的日志项就在当前日志段文件中
+                    int i = (int) (newEndIndex + 1 - segment.getStartIndex());  // 保留的长度
+                    segment.setEndIndex(newEndIndex);   // 更新日志段的 endIndex
+                    long newFileSize = segment.getEntries().get(i).offset;  // 待砍掉的日志项偏移量
+                    totalSize -= (segment.getFileSize() - newFileSize); // 计算新的日志总大小
+                    segment.setFileSize(newFileSize);   // 设置日志段文件的大小
+                    segment.getEntries().removeAll( // 先从 Records list 中移除后边的全部日志项
                             segment.getEntries().subList(i, segment.getEntries().size()));
-                    FileChannel fileChannel = segment.getRandomAccessFile().getChannel();
-                    fileChannel.truncate(segment.getFileSize());
-                    fileChannel.close();
-                    segment.getRandomAccessFile().close();
-                    String oldFullFileName = logDataDir + File.separator + segment.getFileName();
+                    FileChannel fileChannel = segment.getRandomAccessFile().getChannel();   // 打开文件 channel
+                    fileChannel.truncate(segment.getFileSize());    // 从文件中砍掉剩下的内容
+                    fileChannel.close();    // 关闭文件 channel
+                    segment.getRandomAccessFile().close();  // 关闭文件
+                    String oldFullFileName = logDataDir + File.separator + segment.getFileName();   // 之前文件的名字
                     String newFileName = String.format("%020d-%020d",
-                            segment.getStartIndex(), segment.getEndIndex());
-                    segment.setFileName(newFileName);
+                            segment.getStartIndex(), segment.getEndIndex());    // 新的名字
+                    segment.setFileName(newFileName);   // 指定 segment 为新的名字
                     String newFullFileName = logDataDir + File.separator + segment.getFileName();
-                    new File(oldFullFileName).renameTo(new File(newFullFileName));
-                    segment.setRandomAccessFile(RaftFileUtils.openFile(logDataDir, segment.getFileName(), "rw"));
+                    new File(oldFullFileName).renameTo(new File(newFullFileName));  // 重命名日志段文件
+                    segment.setRandomAccessFile(RaftFileUtils.openFile(logDataDir, segment.getFileName(), "rw"));   // 将对应的 File 保存到 Segment 中
                 }
             } catch (IOException ex) {
                 LOG.warn("io exception, msg={}", ex.getMessage());

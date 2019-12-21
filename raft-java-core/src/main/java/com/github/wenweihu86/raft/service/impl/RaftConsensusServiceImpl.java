@@ -30,160 +30,160 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
         this.raftNode = node;
     }
 
-    @Override
+    @Override   // 收到投票请求后作出的响应，就是比较谁的日志项更新，然后决定投票的结果
     public RaftProto.VoteResponse preVote(RaftProto.VoteRequest request) {
         raftNode.getLock().lock();
         try {
-            RaftProto.VoteResponse.Builder responseBuilder = RaftProto.VoteResponse.newBuilder();
-            responseBuilder.setGranted(false);
-            responseBuilder.setTerm(raftNode.getCurrentTerm());
+            RaftProto.VoteResponse.Builder responseBuilder = RaftProto.VoteResponse.newBuilder();   // 构建 VoteResponse
+            responseBuilder.setGranted(false);  // 默认是 false
+            responseBuilder.setTerm(raftNode.getCurrentTerm()); // 自己的任期号
             if (!ConfigurationUtils.containsServer(raftNode.getConfiguration(), request.getServerId())) {
-                return responseBuilder.build();
+                return responseBuilder.build(); // 如果配置项中不包含请求投票的节点信息，直接否定
             }
             if (request.getTerm() < raftNode.getCurrentTerm()) {
-                return responseBuilder.build();
+                return responseBuilder.build(); // 如果请求者的任期号不如自己的高，也需要否定
             }
-            boolean isLogOk = request.getLastLogTerm() > raftNode.getLastLogTerm()
-                    || (request.getLastLogTerm() == raftNode.getLastLogTerm()
+            boolean isLogOk = request.getLastLogTerm() > raftNode.getLastLogTerm()  // 如果它的日志项任期比自己高
+                    || (request.getLastLogTerm() == raftNode.getLastLogTerm()   // 或者咱俩的日志的任期一致，但是它的索引大于等于自己的
                     && request.getLastLogIndex() >= raftNode.getRaftLog().getLastLogIndex());
             if (!isLogOk) {
-                return responseBuilder.build();
+                return responseBuilder.build(); // 如果它的索引不如自己的新，需要投否定票
             } else {
-                responseBuilder.setGranted(true);
-                responseBuilder.setTerm(raftNode.getCurrentTerm());
+                responseBuilder.setGranted(true);   // 否则设置赞成标记
+                responseBuilder.setTerm(raftNode.getCurrentTerm()); // 并将自己的任期号附带上
             }
             LOG.info("preVote request from server {} " +
                             "in term {} (my term is {}), granted={}",
                     request.getServerId(), request.getTerm(),
-                    raftNode.getCurrentTerm(), responseBuilder.getGranted());
-            return responseBuilder.build();
+                    raftNode.getCurrentTerm(), responseBuilder.getGranted());   // 日志记录收到了谁的投票请求，它的任期是多少，然后我投了赞成还是否定票
+            return responseBuilder.build(); // 返回响应的结果
         } finally {
             raftNode.getLock().unlock();
         }
     }
 
-    @Override
+    @Override   // 节点收到投票请求后的操作，根据日志项的完整性及自己是否投了别人来决定自己的投票结果
     public RaftProto.VoteResponse requestVote(RaftProto.VoteRequest request) {
         raftNode.getLock().lock();
         try {
-            RaftProto.VoteResponse.Builder responseBuilder = RaftProto.VoteResponse.newBuilder();
-            responseBuilder.setGranted(false);
-            responseBuilder.setTerm(raftNode.getCurrentTerm());
+            RaftProto.VoteResponse.Builder responseBuilder = RaftProto.VoteResponse.newBuilder();   // 构建 VoteResponse
+            responseBuilder.setGranted(false);  // 初始化为否定票
+            responseBuilder.setTerm(raftNode.getCurrentTerm()); // 写入自己的任期号
             if (!ConfigurationUtils.containsServer(raftNode.getConfiguration(), request.getServerId())) {
-                return responseBuilder.build();
+                return responseBuilder.build(); // 如果配置项中不包含请求者的信息，直接投否定票
             }
             if (request.getTerm() < raftNode.getCurrentTerm()) {
-                return responseBuilder.build();
+                return responseBuilder.build(); // 如果它的任期不如自己的高，直接投否定票
             }
             if (request.getTerm() > raftNode.getCurrentTerm()) {
-                raftNode.stepDown(request.getTerm());
+                raftNode.stepDown(request.getTerm());   // 如果它的任期比自己的高，自己需要执行降级
             }
-            boolean logIsOk = request.getLastLogTerm() > raftNode.getLastLogTerm()
-                    || (request.getLastLogTerm() == raftNode.getLastLogTerm()
+            boolean logIsOk = request.getLastLogTerm() > raftNode.getLastLogTerm()  // 如果它的日志任期比自己的日志任期高
+                    || (request.getLastLogTerm() == raftNode.getLastLogTerm()   // 或者咱俩任期相同，但是它的索引值比自己的大
                     && request.getLastLogIndex() >= raftNode.getRaftLog().getLastLogIndex());
-            if (raftNode.getVotedFor() == 0 && logIsOk) {
-                raftNode.stepDown(request.getTerm());
-                raftNode.setVotedFor(request.getServerId());
-                raftNode.getRaftLog().updateMetaData(raftNode.getCurrentTerm(), raftNode.getVotedFor(), null);
-                responseBuilder.setGranted(true);
-                responseBuilder.setTerm(raftNode.getCurrentTerm());
+            if (raftNode.getVotedFor() == 0 && logIsOk) {   // 如果还未给别人投过票，并且可以给它投票
+                raftNode.stepDown(request.getTerm());   // 判断参数是否合理，然后重置一些状态信息，更新自己的身份为 Follower，终止心跳任务，重置选举定时器
+                raftNode.setVotedFor(request.getServerId());    // 记录自己的投票对象
+                raftNode.getRaftLog().updateMetaData(raftNode.getCurrentTerm(), raftNode.getVotedFor(), null);  // 更新元数据信息
+                responseBuilder.setGranted(true);   // 标记为赞成票
+                responseBuilder.setTerm(raftNode.getCurrentTerm()); // 写入自己的任期号
             }
             LOG.info("RequestVote request from server {} " +
                             "in term {} (my term is {}), granted={}",
                     request.getServerId(), request.getTerm(),
-                    raftNode.getCurrentTerm(), responseBuilder.getGranted());
+                    raftNode.getCurrentTerm(), responseBuilder.getGranted());   // 日志打印收到了谁的投票请求，任期号多少，我的任期号，我赞成或者否定票
             return responseBuilder.build();
         } finally {
             raftNode.getLock().unlock();
         }
     }
 
-    @Override
+    @Override   // 追加日志项，根据条件来决定是否完成追加，期间可能需要砍掉脏日志记录，也可能是收到的心跳消息，然后完成日志追加，日志项的应用，然后响应 Leader 结果
     public RaftProto.AppendEntriesResponse appendEntries(RaftProto.AppendEntriesRequest request) {
         raftNode.getLock().lock();
         try {
-            RaftProto.AppendEntriesResponse.Builder responseBuilder
+            RaftProto.AppendEntriesResponse.Builder responseBuilder // 构建 AppendEntriesResponse
                     = RaftProto.AppendEntriesResponse.newBuilder();
-            responseBuilder.setTerm(raftNode.getCurrentTerm());
-            responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_FAIL);
-            responseBuilder.setLastLogIndex(raftNode.getRaftLog().getLastLogIndex());
-            if (request.getTerm() < raftNode.getCurrentTerm()) {
+            responseBuilder.setTerm(raftNode.getCurrentTerm()); // 设置自己的任期号
+            responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_FAIL);    // 默认的响应状态码
+            responseBuilder.setLastLogIndex(raftNode.getRaftLog().getLastLogIndex());   // 自己最后一条日志项的索引
+            if (request.getTerm() < raftNode.getCurrentTerm()) {    // 如果请求者的任期小于自己，否定追加操作
                 return responseBuilder.build();
             }
-            raftNode.stepDown(request.getTerm());
-            if (raftNode.getLeaderId() == 0) {
-                raftNode.setLeaderId(request.getServerId());
-                LOG.info("new leaderId={}, conf={}",
+            raftNode.stepDown(request.getTerm());   // 判断参数是否合理，然后重置一些状态信息，更新自己的身份为 Follower，终止心跳任务，重置选举定时器
+            if (raftNode.getLeaderId() == 0) {  // 如果自己还未记录过 Leader 节点的信息
+                raftNode.setLeaderId(request.getServerId());    // 更新 Leader 节点的信息
+                LOG.info("new leaderId={}, conf={}",    // 打印节点及 Leader 信息
                         raftNode.getLeaderId(),
                         PRINTER.printToString(raftNode.getConfiguration()));
             }
-            if (raftNode.getLeaderId() != request.getServerId()) {
-                LOG.warn("Another peer={} declares that it is the leader " +
+            if (raftNode.getLeaderId() != request.getServerId()) {  // 如果自己当前记录的 Leader 信息和收到的日志追加请求的节点信息不一致
+                LOG.warn("Another peer={} declares that it is the leader " +    // 打印警告信息
                                 "at term={} which was occupied by leader={}",
                         request.getServerId(), request.getTerm(), raftNode.getLeaderId());
-                raftNode.stepDown(request.getTerm() + 1);
+                raftNode.stepDown(request.getTerm() + 1);   // 这里为什么是它的任期加一呢？？
                 responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_FAIL);
                 responseBuilder.setTerm(request.getTerm() + 1);
                 return responseBuilder.build();
             }
 
-            if (request.getPrevLogIndex() > raftNode.getRaftLog().getLastLogIndex()) {
+            if (request.getPrevLogIndex() > raftNode.getRaftLog().getLastLogIndex()) {  // 如果自己没有上一条日志项
                 LOG.info("Rejecting AppendEntries RPC would leave gap, " +
                         "request prevLogIndex={}, my lastLogIndex={}",
                         request.getPrevLogIndex(), raftNode.getRaftLog().getLastLogIndex());
-                return responseBuilder.build();
+                return responseBuilder.build(); // 响应追加失败，其实此时响应用已经有自己的最后一条日志项的索引值了
             }
-            if (request.getPrevLogIndex() >= raftNode.getRaftLog().getFirstLogIndex()
-                    && raftNode.getRaftLog().getEntryTerm(request.getPrevLogIndex())
+            if (request.getPrevLogIndex() >= raftNode.getRaftLog().getFirstLogIndex()   // 如果上一条日志项索引大于自己的第一条日志项
+                    && raftNode.getRaftLog().getEntryTerm(request.getPrevLogIndex())    // 且自己上一条日志项的任期和请求的不一致
                     != request.getPrevLogTerm()) {
-                LOG.info("Rejecting AppendEntries RPC: terms don't agree, " +
+                LOG.info("Rejecting AppendEntries RPC: terms don't agree, " +   // 上一条日志项不匹配
                         "request prevLogTerm={} in prevLogIndex={}, my is {}",
                         request.getPrevLogTerm(), request.getPrevLogIndex(),
                         raftNode.getRaftLog().getEntryTerm(request.getPrevLogIndex()));
-                Validate.isTrue(request.getPrevLogIndex() > 0);
-                responseBuilder.setLastLogIndex(request.getPrevLogIndex() - 1);
+                Validate.isTrue(request.getPrevLogIndex() > 0); // 上一条日志项的索引大于 0
+                responseBuilder.setLastLogIndex(request.getPrevLogIndex() - 1); // 告诉 Leader 自己需要的日志项是上一条日志项
                 return responseBuilder.build();
             }
 
-            if (request.getEntriesCount() == 0) {
-                LOG.debug("heartbeat request from peer={} at term={}, my term={}",
+            if (request.getEntriesCount() == 0) {   // 如果追加的日志项长度为 0
+                LOG.debug("heartbeat request from peer={} at term={}, my term={}",  // 此时收到的就是心跳消息
                         request.getServerId(), request.getTerm(), raftNode.getCurrentTerm());
-                responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS);
-                responseBuilder.setTerm(raftNode.getCurrentTerm());
-                responseBuilder.setLastLogIndex(raftNode.getRaftLog().getLastLogIndex());
-                advanceCommitIndex(request);
-                return responseBuilder.build();
+                responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS); // 响应心跳收到
+                responseBuilder.setTerm(raftNode.getCurrentTerm()); // 告诉 Leader 自己的任期号
+                responseBuilder.setLastLogIndex(raftNode.getRaftLog().getLastLogIndex());   // 告诉 Leader 自己最后一条日志项的索引
+                advanceCommitIndex(request);    // 确定新的 commitIndex，然后让状态机应用日志项直到新的 commitIndex
+                return responseBuilder.build(); // 向 Leader 节点返回心跳消息
             }
 
-            responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS);
+            responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS); // 执行到这里，说明不是心跳消息
             List<RaftProto.LogEntry> entries = new ArrayList<>();
-            long index = request.getPrevLogIndex();
+            long index = request.getPrevLogIndex(); // 上一条日志项的索引
             for (RaftProto.LogEntry entry : request.getEntriesList()) {
                 index++;
-                if (index < raftNode.getRaftLog().getFirstLogIndex()) {
+                if (index < raftNode.getRaftLog().getFirstLogIndex()) { // 跳过自己第一条日志项之前的全部日志项
                     continue;
                 }
-                if (raftNode.getRaftLog().getLastLogIndex() >= index) {
-                    if (raftNode.getRaftLog().getEntryTerm(index) == entry.getTerm()) {
-                        continue;
+                if (raftNode.getRaftLog().getLastLogIndex() >= index) { // 如果自己最后一条日志项大于当前的日志项
+                    if (raftNode.getRaftLog().getEntryTerm(index) == entry.getTerm()) { // 如果自己已经存在的日志项跟收到的日志项任期一致
+                        continue;   // 继续
                     }
                     // truncate segment log from index
                     long lastIndexKept = index - 1;
-                    raftNode.getRaftLog().truncateSuffix(lastIndexKept);
-                }
-                entries.add(entry);
+                    raftNode.getRaftLog().truncateSuffix(lastIndexKept);    // 砍掉之后不匹配的日志项
+                }   // 删除 newEndIndex 之后的日志项，包括 Segment 的 Record list 和日志段文件中内容，更新 Segment 相关的信息，重命名文件
+                entries.add(entry); // 将日志项添加到 list 中
             }
-            raftNode.getRaftLog().append(entries);
-            raftNode.getRaftLog().updateMetaData(raftNode.getCurrentTerm(),
+            raftNode.getRaftLog().append(entries);  // 将收到的日志项追加到本地中
+            raftNode.getRaftLog().updateMetaData(raftNode.getCurrentTerm(), // 更新元数据信息
                     null, raftNode.getRaftLog().getFirstLogIndex());
-            responseBuilder.setLastLogIndex(raftNode.getRaftLog().getLastLogIndex());
+            responseBuilder.setLastLogIndex(raftNode.getRaftLog().getLastLogIndex());   // 响应中告诉 Leader 自己接下来需要的日志项的位置
 
-            advanceCommitIndex(request);
-            LOG.info("AppendEntries request from server {} " +
+            advanceCommitIndex(request);    // 确定新的 commitIndex，然后让状态机应用日志项直到新的 commitIndex
+            LOG.info("AppendEntries request from server {} " +  // 收到了谁的日志追加请求，任期是多少，我的任期是多少，日志项条数，自己的追加结果如何
                             "in term {} (my term is {}), entryCount={} resCode={}",
                     request.getServerId(), request.getTerm(), raftNode.getCurrentTerm(),
                     request.getEntriesCount(), responseBuilder.getResCode());
-            return responseBuilder.build();
+            return responseBuilder.build(); // 返回给 Leader 节点日志追加的结果
         } finally {
             raftNode.getLock().unlock();
         }
@@ -308,21 +308,21 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
         return responseBuilder.build();
     }
 
-    // in lock, for follower
+    // in lock, for follower 确定新的 commitIndex，然后让状态机应用日志项直到新的 commitIndex
     private void advanceCommitIndex(RaftProto.AppendEntriesRequest request) {
-        long newCommitIndex = Math.min(request.getCommitIndex(),
+        long newCommitIndex = Math.min(request.getCommitIndex(),    // 新的 commitIndex 不能超过 Leader 的 commitIndex
                 request.getPrevLogIndex() + request.getEntriesCount());
-        raftNode.setCommitIndex(newCommitIndex);
-        if (raftNode.getLastAppliedIndex() < raftNode.getCommitIndex()) {
+        raftNode.setCommitIndex(newCommitIndex);    // 更新自己的 commitIndex
+        if (raftNode.getLastAppliedIndex() < raftNode.getCommitIndex()) {   // 如果自己的 applyIndex 小于 commitIndex
             // apply state machine
             for (long index = raftNode.getLastAppliedIndex() + 1;
-                 index <= raftNode.getCommitIndex(); index++) {
-                RaftProto.LogEntry entry = raftNode.getRaftLog().getEntry(index);
+                 index <= raftNode.getCommitIndex(); index++) { // 从第一条没被 apply 的日志项开始往后执行
+                RaftProto.LogEntry entry = raftNode.getRaftLog().getEntry(index);   // 拿到对应的日志项
                 if (entry != null) {
                     if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA) {
-                        raftNode.getStateMachine().apply(entry.getData().toByteArray());
+                        raftNode.getStateMachine().apply(entry.getData().toByteArray());    // 如果是数据，交由状态机执行
                     } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {
-                        raftNode.applyConfiguration(entry);
+                        raftNode.applyConfiguration(entry); // 如果是配置项，直接应用
                     }
                 }
                 raftNode.setLastAppliedIndex(index);
