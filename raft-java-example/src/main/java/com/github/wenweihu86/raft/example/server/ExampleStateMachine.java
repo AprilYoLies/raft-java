@@ -46,22 +46,22 @@ public class ExampleStateMachine implements StateMachine {
     public void readSnapshot(String snapshotDir) {
         try {
             // copy snapshot dir to data dir
-            if (db != null) {
+            if (db != null) {   // 直接关闭 RocksDB（快照就包含了全部的执行结果）
                 db.close();
             }
-            String dataDir = raftDataDir + File.separator + "rocksdb_data";
-            File dataFile = new File(dataDir);  // /Users/eva/IdeaProjects/raft-java/raft-java-example/data/rocksdb_data
-            if (dataFile.exists()) {
+            String dataDir = raftDataDir + File.separator + "rocksdb_data"; // RocksDB 的数据目录
+            File dataFile = new File(dataDir);  // /Users/eva/IdeaProjects/raft-java/raft-java-example/data/rocksdb_data    // RocksDB 的数据目录对应的 File
+            if (dataFile.exists()) {    // 如果 RocksDB 的数据目录已存在，删除存在的数据目录
                 FileUtils.deleteDirectory(dataFile);
             }
-            File snapshotFile = new File(snapshotDir);
+            File snapshotFile = new File(snapshotDir);  // 快照文件对应的 File
             if (snapshotFile.exists()) {
                 FileUtils.copyDirectory(snapshotFile, dataFile);    // 将快照 data 拷贝到 rocksdb 中
             }
             // open rocksdb data dir
             Options options = new Options();
             options.setCreateIfMissing(true);
-            db = RocksDB.open(options, dataDir);
+            db = RocksDB.open(options, dataDir);    // RocksDB 直接打开快照就是执行后的结果
         } catch (Exception ex) {
             LOG.warn("meet exception, msg={}", ex.getMessage());
         }

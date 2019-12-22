@@ -92,11 +92,11 @@ public class Snapshot {
     }
     // 尝试读取本地快照的元数据
     public RaftProto.SnapshotMetaData readMetaData() {
-        String fileName = snapshotDir + File.separator + "metadata";    // /Users/eva/IdeaProjects/raft-java/raft-java-example/data/snapshot/metadata
-        File file = new File(fileName);
+        String fileName = snapshotDir + File.separator + "metadata";    // 快照元数据对应的文件夹
+        File file = new File(fileName); // 快照元数据文件夹对应的 File
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "r")) {
             RaftProto.SnapshotMetaData metadata = RaftFileUtils.readProtoFromFile(
-                    randomAccessFile, RaftProto.SnapshotMetaData.class);
+                    randomAccessFile, RaftProto.SnapshotMetaData.class);    // 从元数据文件中读取数据，期间进行了 crc32 校验，然后将数据解析成为对应的类型返回
             return metadata;
         } catch (IOException ex) {
             LOG.warn("meta file not exist, name={}", fileName);

@@ -193,17 +193,17 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
     public RaftProto.InstallSnapshotResponse installSnapshot(RaftProto.InstallSnapshotRequest request) {
         RaftProto.InstallSnapshotResponse.Builder responseBuilder
                 = RaftProto.InstallSnapshotResponse.newBuilder();
-        responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_FAIL);
+        responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_FAIL);    // 默认初始化为失败
 
         raftNode.getLock().lock();
         try {
-            responseBuilder.setTerm(raftNode.getCurrentTerm());
-            if (request.getTerm() < raftNode.getCurrentTerm()) {
-                return responseBuilder.build();
+            responseBuilder.setTerm(raftNode.getCurrentTerm()); // 填充自己的任期号
+            if (request.getTerm() < raftNode.getCurrentTerm()) {    // 如果它的任期比自己低
+                return responseBuilder.build(); // 拒绝快照安装请求
             }
-            raftNode.stepDown(request.getTerm());
-            if (raftNode.getLeaderId() == 0) {
-                raftNode.setLeaderId(request.getServerId());
+            raftNode.stepDown(request.getTerm());   // 确保自己是 follower 身份，同时重置选举定时器
+            if (raftNode.getLeaderId() == 0) {  // 如果自己未记录过 Leader id
+                raftNode.setLeaderId(request.getServerId());    // 记录 Leader id
                 LOG.info("new leaderId={}, conf={}",
                         raftNode.getLeaderId(),
                         PRINTER.printToString(raftNode.getConfiguration()));
@@ -212,59 +212,59 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
             raftNode.getLock().unlock();
         }
 
-        if (raftNode.getSnapshot().getIsTakeSnapshot().get()) {
+        if (raftNode.getSnapshot().getIsTakeSnapshot().get()) { // 如果自己正在拍快照
             LOG.warn("alreay in take snapshot, do not handle install snapshot request now");
-            return responseBuilder.build();
+            return responseBuilder.build(); // 拒绝安装快照的请求
         }
 
-        raftNode.getSnapshot().getIsInstallSnapshot().set(true);
+        raftNode.getSnapshot().getIsInstallSnapshot().set(true);    // 设置自己正在安装快照的状态
         RandomAccessFile randomAccessFile = null;
         raftNode.getSnapshot().getLock().lock();
         try {
             // write snapshot data to local
-            String tmpSnapshotDir = raftNode.getSnapshot().getSnapshotDir() + ".tmp";
-            File file = new File(tmpSnapshotDir);
-            if (request.getIsFirst()) {
-                if (file.exists()) {
+            String tmpSnapshotDir = raftNode.getSnapshot().getSnapshotDir() + ".tmp";   // 临时快照目录
+            File file = new File(tmpSnapshotDir);   // 对应临时快照目录的 File
+            if (request.getIsFirst()) { // 如果本次请求是第一个文件批次
+                if (file.exists()) {    // 删除已经存在的快照目录
                     file.delete();
                 }
-                file.mkdir();
+                file.mkdir();   // 重新创建快照文件目录
                 LOG.info("begin accept install snapshot request from serverId={}", request.getServerId());
-                raftNode.getSnapshot().updateMetaData(tmpSnapshotDir,
-                        request.getSnapshotMetaData().getLastIncludedIndex(),
-                        request.getSnapshotMetaData().getLastIncludedTerm(),
-                        request.getSnapshotMetaData().getConfiguration());
+                raftNode.getSnapshot().updateMetaData(tmpSnapshotDir,   // 更新自己的快照元信息
+                        request.getSnapshotMetaData().getLastIncludedIndex(),   // 包括最后一个日志项的索引
+                        request.getSnapshotMetaData().getLastIncludedTerm(),    // 最后一个日志项的任期
+                        request.getSnapshotMetaData().getConfiguration());  // 快照对应的配置信息
             }
             // write to file
-            String currentDataDirName = tmpSnapshotDir + File.separator + "data";
-            File currentDataDir = new File(currentDataDirName);
-            if (!currentDataDir.exists()) {
-                currentDataDir.mkdirs();
+            String currentDataDirName = tmpSnapshotDir + File.separator + "data";   // 当前的快照文件目录
+            File currentDataDir = new File(currentDataDirName); // 代表当前快照文件目录的 File
+            if (!currentDataDir.exists()) { // 如果这个文件夹已经存在
+                currentDataDir.mkdirs();    // 删除
             }
 
-            String currentDataFileName = currentDataDirName + File.separator + request.getFileName();
-            File currentDataFile = new File(currentDataFileName);
+            String currentDataFileName = currentDataDirName + File.separator + request.getFileName();   // 收到的快照文件的名字
+            File currentDataFile = new File(currentDataFileName);   // 对应收到的快照文件的 File
             // 文件名可能是个相对路径，比如topic/0/message.txt
-            if (!currentDataFile.getParentFile().exists()) {
-                currentDataFile.getParentFile().mkdirs();
+            if (!currentDataFile.getParentFile().exists()) {    // 如果保存文件的上级目录不存在
+                currentDataFile.getParentFile().mkdirs();   // 创建上级目录
             }
-            if (!currentDataFile.exists()) {
-                currentDataFile.createNewFile();
+            if (!currentDataFile.exists()) {    // 如果快照文件不存在
+                currentDataFile.createNewFile();    // 创建快照文件
             }
-            randomAccessFile = RaftFileUtils.openFile(
+            randomAccessFile = RaftFileUtils.openFile(  // 打开对应的快照文件
                     tmpSnapshotDir + File.separator + "data",
                     request.getFileName(), "rw");
-            randomAccessFile.seek(request.getOffset());
-            randomAccessFile.write(request.getData().toByteArray());
+            randomAccessFile.seek(request.getOffset()); // 定位写入位置
+            randomAccessFile.write(request.getData().toByteArray());    // 将收到的数据写入快照文件
             // move tmp dir to snapshot dir if this is the last package
-            if (request.getIsLast()) {
-                File snapshotDirFile = new File(raftNode.getSnapshot().getSnapshotDir());
-                if (snapshotDirFile.exists()) {
+            if (request.getIsLast()) {  // 如果当前收到的是最后一个文件批次，需要将收到的全部快照文件移动了真正的快照文件目录
+                File snapshotDirFile = new File(raftNode.getSnapshot().getSnapshotDir());   // 真正的快照文件夹
+                if (snapshotDirFile.exists()) { // 删除存在的快照文件夹
                     FileUtils.deleteDirectory(snapshotDirFile);
                 }
-                FileUtils.moveDirectory(new File(tmpSnapshotDir), snapshotDirFile);
+                FileUtils.moveDirectory(new File(tmpSnapshotDir), snapshotDirFile); // 将收到的临时快照文件夹中的快照文件移动到真正的快照文件夹中
             }
-            responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS);
+            responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS); // 响应 Leader 本批次的快照文件接收成功
             LOG.info("install snapshot request from server {} " +
                             "in term {} (my term is {}), resCode={}",
                     request.getServerId(), request.getTerm(),
@@ -272,21 +272,21 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
         } catch (IOException ex) {
             LOG.warn("when handle installSnapshot request, meet exception:", ex);
         } finally {
-            RaftFileUtils.closeFile(randomAccessFile);
+            RaftFileUtils.closeFile(randomAccessFile);  // 关闭正在写入的快照文件
             raftNode.getSnapshot().getLock().unlock();
         }
-
+        // 如果当前收到的是最后一个批次的快照文件并且数据写入成功了
         if (request.getIsLast() && responseBuilder.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {
             // apply state machine
             // TODO: make this async
-            String snapshotDataDir = raftNode.getSnapshot().getSnapshotDir() + File.separator + "data";
-            raftNode.getStateMachine().readSnapshot(snapshotDataDir);
+            String snapshotDataDir = raftNode.getSnapshot().getSnapshotDir() + File.separator + "data"; // 真正的快照文件目录
+            raftNode.getStateMachine().readSnapshot(snapshotDataDir);   // 交由状态机应用快照，就是将快照文件移动到 RocksDB 对应的数据目录，然后让 RocksDB 打开快照即可
             long lastSnapshotIndex;
             // 重新加载snapshot
             raftNode.getSnapshot().getLock().lock();
             try {
-                raftNode.getSnapshot().reload();
-                lastSnapshotIndex = raftNode.getSnapshot().getMetaData().getLastIncludedIndex();
+                raftNode.getSnapshot().reload();    // 尝试从本地获取快照元数据，没有的话就构建一个
+                lastSnapshotIndex = raftNode.getSnapshot().getMetaData().getLastIncludedIndex();    // 元数据中记录的最后一个日志项的索引
             } finally {
                 raftNode.getSnapshot().getLock().unlock();
             }
@@ -294,7 +294,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
             // discard old log entries
             raftNode.getLock().lock();
             try {
-                raftNode.getRaftLog().truncatePrefix(lastSnapshotIndex + 1);
+                raftNode.getRaftLog().truncatePrefix(lastSnapshotIndex + 1);    // 删除 lastSnapshotIndex + 1 之前的全部日志项相关的内容
             } finally {
                 raftNode.getLock().unlock();
             }
@@ -302,7 +302,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
         }
 
         if (request.getIsLast()) {
-            raftNode.getSnapshot().getIsInstallSnapshot().set(false);
+            raftNode.getSnapshot().getIsInstallSnapshot().set(false);   // 如果快照安装完成，修改最后的状态
         }
 
         return responseBuilder.build();

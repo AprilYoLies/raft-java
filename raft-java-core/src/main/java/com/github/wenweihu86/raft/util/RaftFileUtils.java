@@ -81,28 +81,28 @@ public class RaftFileUtils {
             LOG.warn("close file error , msg={}", ex.getMessage());
         }
     }
-    // 从元数据文件中读取数据，期间进行了 crc32 校验
+    // 从元数据文件中读取数据，期间进行了 crc32 校验，然后将数据解析成为对应的类型返回
     public static <T extends Message> T readProtoFromFile(RandomAccessFile raf, Class<T> clazz) {
         try {
-            long crc32FromFile = raf.readLong();
-            int dataLen = raf.readInt();
-            int hasReadLen = (Long.SIZE + Integer.SIZE) / Byte.SIZE;
-            if (raf.length() - hasReadLen < dataLen) {
-                LOG.warn("file remainLength < dataLen");
+            long crc32FromFile = raf.readLong();    // crc32 校验值
+            int dataLen = raf.readInt();    // 数据长度
+            int hasReadLen = (Long.SIZE + Integer.SIZE) / Byte.SIZE;    // 已读数据长度
+            if (raf.length() - hasReadLen < dataLen) {  // 如果后边的数据不够长度
+                LOG.warn("file remainLength < dataLen");    // 读取失败
                 return null;
             }
-            byte[] data = new byte[dataLen];
-            int readLen = raf.read(data);
-            if (readLen != dataLen) {
+            byte[] data = new byte[dataLen];    // 存储数据的字节数组
+            int readLen = raf.read(data);   // 读取真正的数据
+            if (readLen != dataLen) {   // 读取的长度不等于记录长度
                 LOG.warn("readLen != dataLen");
                 return null;
             }
-            long crc32FromData = getCRC32(data);
-            if (crc32FromFile != crc32FromData) {
+            long crc32FromData = getCRC32(data);    // 获取已读数据的校验值
+            if (crc32FromFile != crc32FromData) {   // 校验出现问题
                 LOG.warn("crc32 check failed");
                 return null;
             }
-            Method method = clazz.getMethod("parseFrom", byte[].class);
+            Method method = clazz.getMethod("parseFrom", byte[].class); // 解析成为对应的类型
             T message = (T) method.invoke(clazz, data);
             return message;
         } catch (Exception ex) {
