@@ -67,7 +67,7 @@ public class ExampleStateMachine implements StateMachine {
         }
     }
 
-    @Override
+    @Override   // 将 dataBytes 解析为 SetRequest，以 key-value 的形式存入 RocksDB
     public void apply(byte[] dataBytes) {   // 仅仅是将 key value 保存至 RocksDB 中
         try {
             ExampleProto.SetRequest request = ExampleProto.SetRequest.parseFrom(dataBytes);

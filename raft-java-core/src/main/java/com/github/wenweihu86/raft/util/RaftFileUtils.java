@@ -40,7 +40,7 @@ public class RaftFileUtils {
         Collections.sort(fileList);
         return fileList;
     }
-
+    // 打开 dir/fileName 对应的文件返回
     public static RandomAccessFile openFile(String dir, String fileName, String mode) {
         try {
             String fullFileName = dir + File.separator + fileName;

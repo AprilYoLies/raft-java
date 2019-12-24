@@ -27,16 +27,16 @@ public class Segment {
     private String fileName;
     private RandomAccessFile randomAccessFile;
     private List<Record> entries = new ArrayList<>();
-
+    // 从 Segment 中获取 index 对应的 LogEntry
     public RaftProto.LogEntry getEntry(long index) {
-        if (startIndex == 0 || endIndex == 0) {
+        if (startIndex == 0 || endIndex == 0) { // 参数检查
             return null;
         }
-        if (index < startIndex || index > endIndex) {
+        if (index < startIndex || index > endIndex) {   // 参数检查
             return null;
         }
         int indexInList = (int) (index - startIndex);
-        return entries.get(indexInList).entry;
+        return entries.get(indexInList).entry;  // 获取 index 对应的日志项
     }
 
     public boolean isCanWrite() {

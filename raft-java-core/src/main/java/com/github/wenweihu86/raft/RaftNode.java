@@ -65,8 +65,8 @@ public class RaftNode {
     private ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture electionScheduledFuture;
     private ScheduledFuture heartbeatScheduledFuture;
-    // 保存了 raftOptions，构建了 RaftProto.Configuration，创建 snapshot 并尝试从本地加载快照元数据，创建 raftLog 并加载了本地元数据，比较快照范围，执行后续的日志项，更新 applyIndex
-    public RaftNode(RaftOptions raftOptions,
+    // 将本地的日志段文件载入到 SegmentedLog，读取本地的快照，通过本地快照恢复 currentTerm、votedFor、commitIndex，
+    public RaftNode(RaftOptions raftOptions,    // 并砍掉快照之前的全部日志项，应用本地快照的数据，和之后的索引项
                     List<RaftProto.Server> servers,
                     RaftProto.Server localServer,
                     StateMachine stateMachine) {
@@ -80,7 +80,7 @@ public class RaftNode {
         this.localServer = localServer;
         this.stateMachine = stateMachine;
 
-        // load log and snapshot
+        // load log and snapshot 尝试加载段数据（本地），加载了本地的元数据，将日志段数据解析为 Segment，然后更新了元数据信息
         raftLog = new SegmentedLog(raftOptions.getDataDir(), raftOptions.getMaxSegmentFileSize());  // 尝试加载段数据（本地），加载了本地的元数据
         snapshot = new Snapshot(raftOptions.getDataDir());  // 创建快照类，主要是创建了快照对应的目录
         snapshot.reload();  // 尝试从本地获取快照元数据，没有的话就构建一个
@@ -89,24 +89,24 @@ public class RaftNode {
         votedFor = raftLog.getMetaData().getVotedFor(); // 获取日志元数据中的投票值
         commitIndex = Math.max(snapshot.getMetaData().getLastIncludedIndex(), commitIndex); // 确定 commit index
         // discard old log entries 丢弃过期日志项
-        if (snapshot.getMetaData().getLastIncludedIndex() > 0
+        if (snapshot.getMetaData().getLastIncludedIndex() > 0   // 如果进行过快照，且本机还包含快照过的日志项
                 && raftLog.getFirstLogIndex() <= snapshot.getMetaData().getLastIncludedIndex()) {
-            raftLog.truncatePrefix(snapshot.getMetaData().getLastIncludedIndex() + 1);  // 进行快照后的日志项需要删除
+            raftLog.truncatePrefix(snapshot.getMetaData().getLastIncludedIndex() + 1);  // 删除快照最后一条日志项之前的全部日志项
         }
         // apply state machine
-        RaftProto.Configuration snapshotConfiguration = snapshot.getMetaData().getConfiguration();
-        if (snapshotConfiguration.getServersCount() > 0) {
+        RaftProto.Configuration snapshotConfiguration = snapshot.getMetaData().getConfiguration();  // 快照元数据中的配置信息
+        if (snapshotConfiguration.getServersCount() > 0) {  // 如果元数据的配置的节点数大于 0，就是用这个配置信息
             configuration = snapshotConfiguration;
         }
-        String snapshotDataDir = snapshot.getSnapshotDir() + File.separator + "data";   // 快照目录
+        String snapshotDataDir = snapshot.getSnapshotDir() + File.separator + "data";   // 快照数据目录
         stateMachine.readSnapshot(snapshotDataDir); // 通过状态机读取快照，如果 rocksdb 文件夹存在，删除，然后将快照的文件夹拷贝到 rocksdb 中，最后构建 RocksDB，打开位置为 rocksdb 目录
         for (long index = snapshot.getMetaData().getLastIncludedIndex() + 1;
              index <= commitIndex; index++) {   // 如果快照之后到 commitIndex 之间有剩余的日志项
-            RaftProto.LogEntry entry = raftLog.getEntry(index); // 获取这条日志项
+            RaftProto.LogEntry entry = raftLog.getEntry(index); // 获取 index 所在的 Segment，然后从中获取 index 对应的 LogEntry
             if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA) {   // 如果这个日志项是数据，那么就交由状态机执行
-                stateMachine.apply(entry.getData().toByteArray());
+                stateMachine.apply(entry.getData().toByteArray());  // 将 dataBytes 解析为 SetRequest，以 key-value 的形式存入 RocksDB
             } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {   // 如果是配置项块，应用配置项
-                applyConfiguration(entry);
+                applyConfiguration(entry);  // 将 LogEntry 解析为 Configuration，然后将新加入的节点包装为 Peer 实例，然后保存到 peerMap 中
             }
         }
         lastAppliedIndex = commitIndex; // 更新 applyIndex 到 commitIndex
@@ -396,19 +396,19 @@ public class RaftNode {
         }
     }
 
-    // in lock
+    // in lock 将 LogEntry 解析为 Configuration，然后将新加入的节点包装为 Peer 实例，然后保存到 peerMap 中
     public void applyConfiguration(RaftProto.LogEntry entry) {
         try {
-            RaftProto.Configuration newConfiguration
+            RaftProto.Configuration newConfiguration    // 将 LogEntry 解析为 Configuration
                     = RaftProto.Configuration.parseFrom(entry.getData().toByteArray());
             configuration = newConfiguration;
             // update peerMap
             for (RaftProto.Server server : newConfiguration.getServersList()) {
-                if (!peerMap.containsKey(server.getServerId())
-                        && server.getServerId() != localServer.getServerId()) {
-                    Peer peer = new Peer(server);
-                    peer.setNextIndex(raftLog.getLastLogIndex() + 1);
-                    peerMap.put(server.getServerId(), peer);
+                if (!peerMap.containsKey(server.getServerId())  // 如果 peerMap 不包含新配置项中的节点
+                        && server.getServerId() != localServer.getServerId()) { // 且该节点的 id 不是自己，也就是新加入的节点
+                    Peer peer = new Peer(server);   // 构建一个新的 Peer
+                    peer.setNextIndex(raftLog.getLastLogIndex() + 1);   // 指定新添加的节点的 nextIndex
+                    peerMap.put(server.getServerId(), peer);    // 保存到 peerMap 中
                 }
             }
             LOG.info("new conf is {}, leaderId={}", jsonFormat.printToString(newConfiguration), leaderId);
@@ -587,7 +587,7 @@ public class RaftNode {
                             peer.getServer().getServerId(),
                             response.getTerm(),
                             currentTerm);
-                    stepDown(response.getTerm());   // 别人的任期号比自己的大，需要降级
+                    stepDown(response.getTerm());   // 别人的任期号比自己的大，需要降级，就是更新自己的任期号、同时取消自己设置的心跳任务
                 } else {
                     if (response.getGranted()) {    // 如果这个节点投的是赞成票
                         LOG.info("get pre vote granted from server {} for term {}",
@@ -657,8 +657,8 @@ public class RaftNode {
                         LOG.info("Got vote from server {} for term {}",
                                 peer.getServer().getServerId(), currentTerm);
                         int voteGrantedNum = 0; // 统计得票数
-                        if (votedFor == localServer.getServerId()) {    // 将自己标记为给自己投票了，不再给其它节点投票
-                            voteGrantedNum += 1;    // 得票数自增
+                        if (votedFor == localServer.getServerId()) {    // 如果自己已经给自己投票了，那么就不能再给别人投票
+                            voteGrantedNum += 1;    // 自己的得票数自增
                         }
                         for (RaftProto.Server server : configuration.getServersList()) {    // 统计其它节点给自己的投票情况
                             if (server.getServerId() == localServer.getServerId()) {

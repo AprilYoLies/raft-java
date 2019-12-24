@@ -21,11 +21,11 @@ public class Peer {
     private volatile boolean isCatchUp;
     // 保存了 Server 实例，构建了 RpcClient
     public Peer(RaftProto.Server server) {
-        this.server = server;
-        this.rpcClient = new RpcClient(new Endpoint(
+        this.server = server;   // 两个字段 server_id、endpoints
+        this.rpcClient = new RpcClient(new Endpoint(    // rpc 客户端
                 server.getEndpoint().getHost(),
                 server.getEndpoint().getPort()));   // 通过 RpcClient 构建 RaftConsensusServiceAsync 的代理类
-        raftConsensusServiceAsync = BrpcProxy.getProxy(rpcClient, RaftConsensusServiceAsync.class);
+        raftConsensusServiceAsync = BrpcProxy.getProxy(rpcClient, RaftConsensusServiceAsync.class); // 对应的服务代理
         isCatchUp = false;
     }
 

@@ -43,9 +43,9 @@ public class ServerMain {
         // just for test snapshot
         RaftOptions raftOptions = new RaftOptions();    // 和 raft 相关的属性
         raftOptions.setDataDir(dataPath);
-        raftOptions.setSnapshotMinLogSize(10 * 1024);
-        raftOptions.setSnapshotPeriodSeconds(30);
-        raftOptions.setMaxSegmentFileSize(1024 * 1024);
+        raftOptions.setSnapshotMinLogSize(10 * 1024);   // 最小快照长度 10 KB
+        raftOptions.setSnapshotPeriodSeconds(30);   // 快照时间间隔 30 S
+        raftOptions.setMaxSegmentFileSize(1024 * 1024); // 最大日志段文件长度 1 MB
         // 应用状态机
         ExampleStateMachine stateMachine = new ExampleStateMachine(raftOptions.getDataDir());   // 创建 ExampleStateMachine，保存了路径
         // 初始化RaftNode，保存了 raftOptions，构建了 RaftProto.Configuration，创建 snapshot 并尝试从本地加载快照元数据，创建 raftLog 并加载了本地元数据，比较快照范围，执行后续的日志项，更新 applyIndex

@@ -28,7 +28,7 @@ public class SegmentedLog {
     private TreeMap<Long, Segment> startLogIndexSegmentMap = new TreeMap<>();
     // segment log占用的内存大小，用于判断是否需要做snapshot
     private volatile long totalSize;
-    // 尝试加载段数据（本地），加载了本地的元数据
+    // 尝试加载段数据（本地），加载了本地的元数据，将日志段数据解析为 Segment，然后更新了元数据信息
     public SegmentedLog(String raftDataDir, int maxSegmentFileSize) {
         this.logDir = raftDataDir + File.separator + "log";
         this.logDataDir = logDir + File.separator + "data";
@@ -37,34 +37,34 @@ public class SegmentedLog {
         if (!file.exists()) {
             file.mkdirs();
         }
-        readSegments(); // 尝试读本地文件
+        readSegments(); // 尝试读取本地的日志段文件，然后封装为 Segment
         for (Segment segment : startLogIndexSegmentMap.values()) {  // 段文件的加载
-            this.loadSegmentData(segment);
+            this.loadSegmentData(segment);  // 将日志段段文件解析为 LogEntry list，然后将解析出来的 list 保存到 Segment 中，更新 totalSize 以及 startIndex 和 endIndex
         }
 
-        metaData = this.readMetaData(); // 从元数据文件中读取数据，期间进行了 crc32 校验
+        metaData = this.readMetaData(); // 从元数据文件中读取数据，期间进行了 crc32 校验（currentTerm、votedFor、firstLogIndex）
         if (metaData == null) {
-            if (startLogIndexSegmentMap.size() > 0) {
+            if (startLogIndexSegmentMap.size() > 0) {   // 如果存在日志段文件，但是不存在元数据文件，不允许存在这种情况
                 LOG.error("No readable metadata file but found segments in {}", logDir);
                 throw new RuntimeException("No readable metadata file but found segments");
             }
-            metaData = RaftProto.LogMetaData.newBuilder().setFirstLogIndex(1).build();
+            metaData = RaftProto.LogMetaData.newBuilder().setFirstLogIndex(1).build();  // 如果是初次启动，那么直接创建元数据文件，只需要指定 firstLogIndex
         }
     }
-
+    // 获取 index 所在的 Segment，然后从中获取 index 对应的 LogEntry
     public RaftProto.LogEntry getEntry(long index) {
         long firstLogIndex = getFirstLogIndex();    // 通过日志的元数据块获取第一条日志项的索引
         long lastLogIndex = getLastLogIndex();
-        if (index == 0 || index < firstLogIndex || index > lastLogIndex) {
+        if (index == 0 || index < firstLogIndex || index > lastLogIndex) {  // 参数检查
             LOG.debug("index out of range, index={}, firstLogIndex={}, lastLogIndex={}",
                     index, firstLogIndex, lastLogIndex);
             return null;
         }
-        if (startLogIndexSegmentMap.size() == 0) {
+        if (startLogIndexSegmentMap.size() == 0) {  // 如果当前没有日志段文件
             return null;
         }
-        Segment segment = startLogIndexSegmentMap.floorEntry(index).getValue();
-        return segment.getEntry(index);
+        Segment segment = startLogIndexSegmentMap.floorEntry(index).getValue(); // 小于等于 index 的最大 entry
+        return segment.getEntry(index); // 从 Segment 中获取 index 对应的 LogEntry
     }
     // 获取 index 日志项的任期号
     public long getEntryTerm(long index) {
@@ -239,32 +239,32 @@ public class SegmentedLog {
             }
         }
     }
-
+    // 将日志段段文件解析为 LogEntry list，然后将解析出来的 list 保存到 Segment 中，更新 totalSize 以及 startIndex 和 endIndex
     public void loadSegmentData(Segment segment) {
         try {
-            RandomAccessFile randomAccessFile = segment.getRandomAccessFile();
-            long totalLength = segment.getFileSize();
+            RandomAccessFile randomAccessFile = segment.getRandomAccessFile();  // 拿到 Segment 对应的日志文件
+            long totalLength = segment.getFileSize();   // Segment 对应的日志文件的长度
             long offset = 0;
             while (offset < totalLength) {
-                RaftProto.LogEntry entry = RaftFileUtils.readProtoFromFile(
+                RaftProto.LogEntry entry = RaftFileUtils.readProtoFromFile( // 将文件中的数据读取并解析为 LogEntry（每一条记录都有一个 crc32 校验值和数据长度）
                         randomAccessFile, RaftProto.LogEntry.class);
                 if (entry == null) {
                     throw new RuntimeException("read segment log failed");
                 }
-                Segment.Record record = new Segment.Record(offset, entry);
-                segment.getEntries().add(record);
-                offset = randomAccessFile.getFilePointer();
+                Segment.Record record = new Segment.Record(offset, entry);  // Segment 中是通过 Record 来记录每一项日志项的
+                segment.getEntries().add(record);   // 将对应的 Record 保存到 Segment 中
+                offset = randomAccessFile.getFilePointer(); // 获取当前文件的偏移量
             }
-            totalSize += totalLength;
+            totalSize += totalLength;   // 更新总的日志段长度
         } catch (Exception ex) {
             LOG.error("read segment meet exception, msg={}", ex.getMessage());
             throw new RuntimeException("file not found");
         }
 
-        int entrySize = segment.getEntries().size();
+        int entrySize = segment.getEntries().size();    // 日志项的条数
         if (entrySize > 0) {
-            segment.setStartIndex(segment.getEntries().get(0).entry.getIndex());
-            segment.setEndIndex(segment.getEntries().get(entrySize - 1).entry.getIndex());
+            segment.setStartIndex(segment.getEntries().get(0).entry.getIndex());    // Segment 记录本日志段的起始日志项索引
+            segment.setEndIndex(segment.getEntries().get(entrySize - 1).entry.getIndex());  // Segment 记录本日志段的截止日志项索引
         }
     }
     // 尝试读本地文件
@@ -279,13 +279,13 @@ public class SegmentedLog {
                 }
                 Segment segment = new Segment();
                 segment.setFileName(fileName);
-                if (splitArray[0].equals("open")) {
+                if (splitArray[0].equals("open")) { // 文件名的 open 表示可写
                     segment.setCanWrite(true);
                     segment.setStartIndex(Long.valueOf(splitArray[1]));
                     segment.setEndIndex(0);
                 } else {
                     try {
-                        segment.setCanWrite(false);
+                        segment.setCanWrite(false); // 如果文件名是 num-num，则分别表示 startIndex 和 endIndex
                         segment.setStartIndex(Long.parseLong(splitArray[0]));
                         segment.setEndIndex(Long.parseLong(splitArray[1]));
                     } catch (NumberFormatException ex) {
@@ -293,7 +293,7 @@ public class SegmentedLog {
                         continue;
                     }
                 }
-                segment.setRandomAccessFile(RaftFileUtils.openFile(logDataDir, fileName, "rw"));
+                segment.setRandomAccessFile(RaftFileUtils.openFile(logDataDir, fileName, "rw"));    // 打开 dir/fileName 对应的文件返回
                 segment.setFileSize(segment.getRandomAccessFile().length());
                 startLogIndexSegmentMap.put(segment.getStartIndex(), segment);
             }
