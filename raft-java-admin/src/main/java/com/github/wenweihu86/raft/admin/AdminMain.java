@@ -24,16 +24,16 @@ public class AdminMain {
         String servers = args[0];
         String cmd = args[1];
         String subCmd = args[2];
-        Validate.isTrue(cmd.equals("conf"));
-        Validate.isTrue(subCmd.equals("get")
+        Validate.isTrue(cmd.equals("conf"));    // 命令
+        Validate.isTrue(subCmd.equals("get")    // 子命令校验
                 || subCmd.equals("add")
                 || subCmd.equals("del"));
-        RaftClientService client = new RaftClientServiceProxy(servers);
+        RaftClientService client = new RaftClientServiceProxy(servers); // 通过 clusterRaftClientService 获取到 Leader 信息，然后通过 Leader 的信息构建 leaderRaftClientService
         if (subCmd.equals("get")) {
-            RaftProto.GetConfigurationRequest request = RaftProto.GetConfigurationRequest.newBuilder().build();
-            RaftProto.GetConfigurationResponse response = client.getConfiguration(request);
+            RaftProto.GetConfigurationRequest request = RaftProto.GetConfigurationRequest.newBuilder().build(); // 构建 GetConfigurationRequest
+            RaftProto.GetConfigurationResponse response = client.getConfiguration(request); // 通过 clusterRaftClientService 代理获取 GetConfigurationResponse
             if (response != null) {
-                System.out.println(jsonFormat.printToString(response));
+                System.out.println(jsonFormat.printToString(response)); // 打印对应的结果
             } else {
                 System.out.printf("response == null");
             }

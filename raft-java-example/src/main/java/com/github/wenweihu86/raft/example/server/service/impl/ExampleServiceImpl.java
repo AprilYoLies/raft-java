@@ -2,10 +2,10 @@ package com.github.wenweihu86.raft.example.server.service.impl;
 
 import com.baidu.brpc.client.BrpcProxy;
 import com.baidu.brpc.client.RpcClient;
+import com.github.wenweihu86.raft.RaftNode;
 import com.github.wenweihu86.raft.example.server.ExampleStateMachine;
 import com.github.wenweihu86.raft.example.server.service.ExampleProto;
 import com.github.wenweihu86.raft.example.server.service.ExampleService;
-import com.github.wenweihu86.raft.RaftNode;
 import com.github.wenweihu86.raft.proto.RaftProto;
 import com.googlecode.protobuf.format.JsonFormat;
 import org.slf4j.Logger;

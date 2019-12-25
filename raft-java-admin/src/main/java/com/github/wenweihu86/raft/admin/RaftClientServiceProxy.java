@@ -35,9 +35,9 @@ public class RaftClientServiceProxy implements RaftClientService {
         rpcClientOptions.setConnectTimeoutMillis(1000); // 1s
         rpcClientOptions.setReadTimeoutMillis(3600000); // 1hour
         rpcClientOptions.setWriteTimeoutMillis(1000); // 1s
-        clusterRPCClient = new RpcClient(ipPorts, rpcClientOptions);
-        clusterRaftClientService = BrpcProxy.getProxy(clusterRPCClient, RaftClientService.class);
-        updateConfiguration();
+        clusterRPCClient = new RpcClient(ipPorts, rpcClientOptions);    // 构建 RpcClient
+        clusterRaftClientService = BrpcProxy.getProxy(clusterRPCClient, RaftClientService.class);   // 创建对应的服务代理类
+        updateConfiguration();  // 通过 clusterRaftClientService 获取到 Leader 信息，然后通过 Leader 的信息构建 leaderRaftClientService
     }
 
     @Override
@@ -47,7 +47,7 @@ public class RaftClientServiceProxy implements RaftClientService {
 
     @Override
     public RaftProto.GetConfigurationResponse getConfiguration(RaftProto.GetConfigurationRequest request) {
-        return clusterRaftClientService.getConfiguration(request);
+        return clusterRaftClientService.getConfiguration(request);  // 通过 clusterRaftClientService 代理获取 GetConfigurationResponse
     }
 
     @Override
@@ -78,17 +78,17 @@ public class RaftClientServiceProxy implements RaftClientService {
             clusterRPCClient.stop();
         }
     }
-
+    // 通过 clusterRaftClientService 获取到 Leader 信息，然后通过 Leader 的信息构建 leaderRaftClientService
     private boolean updateConfiguration() {
-        RaftProto.GetConfigurationRequest request = RaftProto.GetConfigurationRequest.newBuilder().build();
-        RaftProto.GetConfigurationResponse response = clusterRaftClientService.getConfiguration(request);
-        if (response != null && response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {
+        RaftProto.GetConfigurationRequest request = RaftProto.GetConfigurationRequest.newBuilder().build(); // 构建 GetConfigurationRequest
+        RaftProto.GetConfigurationResponse response = clusterRaftClientService.getConfiguration(request);   // 通过代理类发送 GetConfigurationRequest
+        if (response != null && response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {  // 如果响应成功
             if (leaderRPCClient != null) {
                 leaderRPCClient.stop();
             }
-            leader = response.getLeader();
-            leaderRPCClient = new RpcClient(convertEndPoint(leader.getEndpoint()), rpcClientOptions);
-            leaderRaftClientService = BrpcProxy.getProxy(leaderRPCClient, RaftClientService.class);
+            leader = response.getLeader();  // Leader 信息
+            leaderRPCClient = new RpcClient(convertEndPoint(leader.getEndpoint()), rpcClientOptions);   // 构建 RpcClient
+            leaderRaftClientService = BrpcProxy.getProxy(leaderRPCClient, RaftClientService.class); // 构建 RaftClientService 服务对应的代理类
             return true;
         }
         return false;

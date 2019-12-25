@@ -1,16 +1,13 @@
 package com.github.wenweihu86.raft.storage;
 
-import com.github.wenweihu86.raft.RaftOptions;
-import com.github.wenweihu86.raft.util.RaftFileUtils;
 import com.github.wenweihu86.raft.proto.RaftProto;
+import com.github.wenweihu86.raft.util.RaftFileUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 

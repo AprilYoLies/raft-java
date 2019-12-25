@@ -1,9 +1,9 @@
 package com.github.wenweihu86.raft.example.server;
 
 import com.baidu.brpc.server.RpcServer;
+import com.github.wenweihu86.raft.RaftNode;
 import com.github.wenweihu86.raft.RaftOptions;
 import com.github.wenweihu86.raft.example.server.service.ExampleService;
-import com.github.wenweihu86.raft.RaftNode;
 import com.github.wenweihu86.raft.example.server.service.impl.ExampleServiceImpl;
 import com.github.wenweihu86.raft.proto.RaftProto;
 import com.github.wenweihu86.raft.service.RaftClientService;

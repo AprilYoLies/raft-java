@@ -3,9 +3,9 @@ package com.github.wenweihu86.raft;
 import com.baidu.brpc.client.RpcCallback;
 import com.github.wenweihu86.raft.proto.RaftProto;
 import com.github.wenweihu86.raft.storage.SegmentedLog;
+import com.github.wenweihu86.raft.storage.Snapshot;
 import com.github.wenweihu86.raft.util.ConfigurationUtils;
 import com.google.protobuf.ByteString;
-import com.github.wenweihu86.raft.storage.Snapshot;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.googlecode.protobuf.format.JsonFormat;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +17,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by wenweihu86 on 2017/5/2.
