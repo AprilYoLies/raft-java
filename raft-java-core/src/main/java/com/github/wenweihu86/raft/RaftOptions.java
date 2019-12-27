@@ -44,4 +44,14 @@ public class RaftOptions {
 
     // raft的log和snapshot父目录，绝对路径
     private String dataDir = System.getProperty("com.github.wenweihu86.raft.data.dir");
+
+    // 基于节点优先级的 Leader 选举方案
+    private boolean priorityElection = false;
+
+    // 资格确认超时时间
+    private int qualificationConfirmTimeout = 200;
+
+    // 资格写入超时时间
+    private long qualificationWriteTimeout = 200;
+
 }

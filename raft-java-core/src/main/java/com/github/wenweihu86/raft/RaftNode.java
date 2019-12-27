@@ -58,15 +58,26 @@ public class RaftNode {
     private long commitIndex;
     // 最后被应用到状态机的日志条目索引值（初始化为 0，持续递增）
     private volatile long lastAppliedIndex;
+    // 当前节点是否进入 Leader 选举阶段
+    private volatile boolean electionLeader = false;
+    // 资格确认标识符
+    private volatile boolean qualificationConfirmOk = false;
+    // 资格写入标识符
+    private boolean qualificationWriteOk;
 
     private Lock lock = new ReentrantLock();
     private Condition commitIndexCondition = lock.newCondition();   // 两个 condition 量
     private Condition catchUpCondition = lock.newCondition();
+    // 优先级表
+    private List<Integer> priorityTable = new ArrayList<>();
+
+    private List<Integer> qualificationTable = new ArrayList<>();
 
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture electionScheduledFuture;
     private ScheduledFuture heartbeatScheduledFuture;
+
     // 将本地的日志段文件载入到 SegmentedLog，读取本地的快照，通过本地快照恢复 currentTerm、votedFor、commitIndex，
     public RaftNode(RaftOptions raftOptions,    // 并砍掉快照之前的全部日志项，应用本地快照的数据，和之后的索引项
                     List<RaftProto.Server> servers,
@@ -76,7 +87,9 @@ public class RaftNode {
         RaftProto.Configuration.Builder confBuilder = RaftProto.Configuration.newBuilder(); // 协议的 Configuration，protobuf 生成
         for (RaftProto.Server server : servers) {
             confBuilder.addServers(server);
+            priorityTable.add(server.getServerId());
         }
+        Collections.sort(priorityTable);
         configuration = confBuilder.build();
 
         this.localServer = localServer;
@@ -194,6 +207,7 @@ public class RaftNode {
         }
         return true;
     }
+
     // 追加日志，先判断是否需要安装快照，然后将必要的信息封装为 AppendEntriesRequest，发送对应的 rpc 请求，如果成功，更新 commitIndex 然后执行对应的日志项
     public void appendEntries(Peer peer) {
         RaftProto.AppendEntriesRequest.Builder requestBuilder = RaftProto.AppendEntriesRequest.newBuilder();    // 构建一个追加日志的消息 Builder
@@ -315,6 +329,7 @@ public class RaftNode {
         }
         resetElectionTimer();   // 重置选举定时器
     }
+
     // 拍快照，检查当前是否满足拍快照的条件，拍快照，然后将结果替换原快照的内容，然后重新载入快照元信息，并删除过期的日志项
     public void takeSnapshot() {
         if (snapshot.getIsInstallSnapshot().get()) {    // 如果正在安装快照，忽略拍快照
@@ -418,6 +433,7 @@ public class RaftNode {
             ex.printStackTrace();
         }
     }
+
     // 尝试获取最后一条日志项，如果日志不为空，就从日志中获取，否则获取快照的最后一条日志项的任期号
     public long getLastLogTerm() {
         long lastLogIndex = raftLog.getLastLogIndex();  // 获取最后一条索引
@@ -432,17 +448,69 @@ public class RaftNode {
     /**
      * 选举定时器
      */ // 如果 electionScheduledFuture 不为空，那么取消任务，重新提交一个选举任务，超时时间是随机的
-    private void resetElectionTimer() {
+    public void resetElectionTimer() {
         if (electionScheduledFuture != null && !electionScheduledFuture.isDone()) { // 如果有任务正在执行，需要取消其中的任务
             electionScheduledFuture.cancel(true);
         }   // 获取一个随机超时时间，为选举超时时间加上 0 ~ electionTimeout 之间的数
-        electionScheduledFuture = scheduledExecutorService.schedule(new Runnable() {
-            @Override
-            public void run() {
-                startPreVote();
-            }   // 获取一个随机超时时间，为选举超时时间加上 0 ~ electionTimeout 之间的数
-        }, getElectionTimeoutMs(), TimeUnit.MILLISECONDS);
+        if (!raftOptions.isPriorityElection()) {
+            electionScheduledFuture = scheduledExecutorService.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    startPreVote();
+                }   // 获取一个随机超时时间，为选举超时时间加上 0 ~ electionTimeout 之间的数
+            }, getElectionTimeoutMs(), TimeUnit.MILLISECONDS);
+        } else {
+            electionScheduledFuture = scheduledExecutorService.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    startPrepareElection();
+                }
+            }, getPriorityElectionTimeoutMs(), TimeUnit.MILLISECONDS);
+        }
     }
+
+    public void startPrepareElection() {
+        lock.lock();
+        try {   // 如果配置中不包含自身，那么就不再继续后边的流程（本次的任务会被 cancel）
+            if (!ConfigurationUtils.containsServer(configuration, localServer.getServerId())) {
+                resetElectionTimer();
+                return;
+            }
+            LOG.info("Start prepare election in term {}", currentTerm);
+        } finally {
+            lock.unlock();
+        }
+
+        for (RaftProto.Server server : configuration.getServersList()) {
+            if (server.getServerId() == localServer.getServerId()) {    // 配置中的节点，忽略自己
+                continue;
+            }
+            final Peer peer = peerMap.get(server.getServerId());    // 获取对应的 Peer 实例
+            executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    prepareElection(peer);
+                }
+            });
+        }
+        resetElectionTimer();
+    }
+
+    private void prepareElection(Peer peer) {
+        LOG.info("begin prepare start vote request");
+        RaftProto.PrepareElectionRequest.Builder requestBuilder = RaftProto.PrepareElectionRequest.newBuilder();
+        lock.lock();
+        try {
+            peer.setVoteGranted(null);
+        } finally {
+            lock.unlock();
+        }
+
+        RaftProto.PrepareElectionRequest request = requestBuilder.build(); // 构建真正的 VoteRequest
+        peer.getRaftConsensusServiceAsync().prepareElection(    // 通过代理类进行真正的 rpc 通信
+                request, new PrepareElectionResponseCallback(peer, request));   // request 是传输的内容
+    }
+
     // 获取一个随机超时时间，为选举超时时间加上 0 ~ electionTimeout 之间的数
     private int getElectionTimeoutMs() {
         ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -450,6 +518,13 @@ public class RaftNode {
                 + random.nextInt(0, raftOptions.getElectionTimeoutMilliseconds());
         LOG.debug("new election time is after {} ms", randomElectionTimeout);
         return randomElectionTimeout;
+    }
+
+    // 获取一个随机超时时间，为选举超时时间加上 0 ~ electionTimeout 之间的数
+    private int getPriorityElectionTimeoutMs() {
+        int priorityTimeout = raftOptions.getElectionTimeoutMilliseconds();    // 默认是 5000 ms
+        LOG.debug("new election time is after {} ms", priorityTimeout);
+        return priorityTimeout;
     }
 
     /**
@@ -521,6 +596,7 @@ public class RaftNode {
 
     /**
      * 客户端发起pre-vote请求
+     *
      * @param peer 服务端节点信息
      */
     private void preVote(Peer peer) {
@@ -544,6 +620,7 @@ public class RaftNode {
 
     /**
      * 客户端发起正式vote请求
+     *
      * @param peer 服务端节点信息
      */
     private void requestVote(Peer peer) {   // 请求其它节点为自己投票
@@ -568,6 +645,7 @@ public class RaftNode {
     private class PreVoteResponseCallback implements RpcCallback<RaftProto.VoteResponse> {
         private Peer peer;
         private RaftProto.VoteRequest request;
+
         // 保存了 Peer 和 VoteRequest
         public PreVoteResponseCallback(Peer peer, RaftProto.VoteRequest request) {
             this.peer = peer;
@@ -627,6 +705,363 @@ public class RaftNode {
                     peer.getServer().getEndpoint().getPort());
             peer.setVoteGranted(new Boolean(false));
         }
+    }
+
+    // 准备选举响应的回调
+    private class PrepareElectionResponseCallback implements RpcCallback<RaftProto.PrepareElectionResponse> {
+
+        private final Peer peer;
+        private final RaftProto.PrepareElectionRequest request;
+
+        public PrepareElectionResponseCallback(Peer peer, RaftProto.PrepareElectionRequest request) {
+            this.peer = peer;
+            this.request = request;
+        }
+
+        @Override   // 准备选举响应成功的回调函数
+        public void success(RaftProto.PrepareElectionResponse response) {
+            lock.lock();
+            try {
+                peer.setVoteGranted(response.getGranted()); // 将其它节点的投票结果进行标记
+                if (response.getGranted()) {    // 如果这个节点投的是赞成票
+                    LOG.info("get prepare election granted from server {} for term {}",
+                            peer.getServer().getServerId(), currentTerm);
+                    int prepareElectionGrantedNum = 1;
+                    for (RaftProto.Server server : configuration.getServersList()) {
+                        if (server.getServerId() == localServer.getServerId()) {
+                            continue;
+                        }
+                        Peer peer1 = peerMap.get(server.getServerId());  // 这里是获取其它节点的投票情况
+                        if (peer1.isVoteGranted() != null && peer1.isVoteGranted() == true) {   // 如果其它节点给自己投了赞成票
+                            prepareElectionGrantedNum += 1;    // 票数增加
+                        }
+                    }
+                    LOG.info("prepareElectionGrantedNum={}", prepareElectionGrantedNum);   // 输出得票数
+                    if (prepareElectionGrantedNum > configuration.getServersCount() / 2) { // 如果得票数超过半数
+                        LOG.info("get majority grants, serverId={} when prepare election, start election",
+                                localServer.getServerId());
+                        startQualificationConfirm();    // 资格确认阶段
+                    }
+                } else {
+                    LOG.info("prepare election denied by server {}, my term is {}",
+                            peer.getServer().getServerId(), currentTerm);
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void fail(Throwable e) {
+
+        }
+    }
+
+    // 资格确认响应回调
+    private class QualificationConfirmResponseCallback implements RpcCallback<RaftProto.QualificationConfirmResponse> {
+        private final Peer peer;
+        private final RaftProto.QualificationConfirmRequest request;
+        private final RaftNode raftNode;
+
+        public QualificationConfirmResponseCallback(RaftNode raftNode, Peer peer, RaftProto.QualificationConfirmRequest request) {
+            this.peer = peer;
+            this.request = request;
+            this.raftNode = raftNode;
+        }
+
+        @Override   // 资格确认响应成功回调函数
+        public void success(RaftProto.QualificationConfirmResponse response) {
+            lock.lock();
+            try {
+                peer.setVoteGranted(response.getGranted()); // 将其它节点的投票结果进行标记
+                if (response.getGranted()) {    // 如果这个节点投的是赞成票
+                    LOG.info("get qualification confirm granted from server {} for term {}",
+                            peer.getServer().getServerId(), currentTerm);
+                    int qualificationConfirmGrantedNum = 1;
+                    for (RaftProto.Server server : configuration.getServersList()) {
+                        if (server.getServerId() == localServer.getServerId()) {
+                            continue;
+                        }
+                        Peer peer1 = peerMap.get(server.getServerId());  // 这里是获取其它节点的投票情况
+                        if (peer1.isVoteGranted() != null && peer1.isVoteGranted() == true) {   // 如果其它节点给自己投了赞成票
+                            qualificationConfirmGrantedNum += 1;    // 票数增加
+                        }
+                    }
+                    LOG.info("qualificationConfirmGrantedNum={}", qualificationConfirmGrantedNum);   // 输出得票数
+                    if (qualificationConfirmGrantedNum > configuration.getServersCount() / 2) { // 如果得票数超过半数
+                        LOG.info("get majority grants, serverId={} when prepare election, start election",
+                                localServer.getServerId());
+                        this.raftNode.qualificationConfirmOk = true;
+                    }
+                } else {
+                    LOG.info("prepare election denied by server {}, my term is {}",
+                            peer.getServer().getServerId(), currentTerm);
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void fail(Throwable e) {
+
+        }
+    }
+
+    // 资格写入回调
+    private class QualificationWriteResponseCallback implements RpcCallback<RaftProto.QualificationWriteResponse> {
+        private final Peer peer;
+        private final RaftProto.QualificationWriteRequest request;
+        private final RaftNode raftNode;
+
+        public QualificationWriteResponseCallback(RaftNode raftNode, Peer peer, RaftProto.QualificationWriteRequest request) {
+            this.peer = peer;
+            this.request = request;
+            this.raftNode = raftNode;
+        }
+
+        @Override   // 资格写入成功回调
+        public void success(RaftProto.QualificationWriteResponse response) {
+            lock.lock();
+            try {
+                peer.setVoteGranted(response.getGranted()); // 将其它节点的投票结果进行标记
+                if (response.getGranted()) {    // 如果这个节点投的是赞成票
+                    LOG.info("get qualification write granted from server {} for term {}",
+                            peer.getServer().getServerId(), currentTerm);
+                    int qualificationConfirmGrantedNum = 1;
+                    for (RaftProto.Server server : configuration.getServersList()) {
+                        if (server.getServerId() == localServer.getServerId()) {
+                            continue;
+                        }
+                        Peer peer1 = peerMap.get(server.getServerId());  // 这里是获取其它节点的投票情况
+                        if (peer1.isVoteGranted() != null && peer1.isVoteGranted() == true) {   // 如果其它节点给自己投了赞成票
+                            qualificationConfirmGrantedNum += 1;    // 票数增加
+                        }
+                    }
+                    LOG.info("qualificationConfirmGrantedNum={}", qualificationConfirmGrantedNum);   // 输出得票数
+                    if (qualificationConfirmGrantedNum > configuration.getServersCount() / 2) { // 如果得票数超过半数
+                        LOG.info("get majority grants, serverId={} when prepare election, start election",
+                                localServer.getServerId());
+                        this.raftNode.qualificationWriteOk = true;
+                    }
+                } else {
+                    LOG.info("prepare election denied by server {}, my term is {}",
+                            peer.getServer().getServerId(), currentTerm);
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void fail(Throwable e) {
+
+        }
+    }
+
+    // 优先级投票的回调
+    private class PriorityVoteResponseCallback implements RpcCallback<RaftProto.PriorityVoteResponse> {
+        private final Peer peer;
+        private final RaftProto.PriorityVoteRequest request;
+        private final RaftNode raftNode;
+
+        public PriorityVoteResponseCallback(RaftNode raftNode, Peer peer, RaftProto.PriorityVoteRequest request) {
+            this.peer = peer;
+            this.request = request;
+            this.raftNode = raftNode;
+        }
+
+        @Override   // 优先级投票成功的回调函数
+        public void success(RaftProto.PriorityVoteResponse response) {
+            lock.lock();
+            try {
+                peer.setVoteGranted(response.getGranted()); // 标记其它节点的投票结果
+                if (response.getGranted()) {    // 如果收到的是赞成票
+                    LOG.info("Got priority vote response from server {} for term {}",
+                            peer.getServer().getServerId(), currentTerm);
+                    int voteGrantedNum = 0; // 统计得票数
+                    int serverId = localServer.getServerId();
+                    if (isHighestPriority(serverId))    // 如果自己的 id 是自己的资格表中优先级最高的节点
+                        voteGrantedNum++;   // 投自己一票
+                    for (RaftProto.Server server : configuration.getServersList()) {    // 统计其它节点给自己的投票情况
+                        if (server.getServerId() == serverId) {
+                            continue;
+                        }
+                        Peer peer1 = peerMap.get(server.getServerId()); // 统计其它节点给自己的投票情况
+                        if (peer1.isVoteGranted() != null && peer1.isVoteGranted() == true) {
+                            voteGrantedNum += 1;    // 如果其它节点给自己投了赞成票，票数自增
+                        }
+                    }
+                    LOG.info("voteGrantedNum={}", voteGrantedNum);  // 打印得票数
+                    if (voteGrantedNum > configuration.getServersCount() / 2) { // 如果得票数超过了半数
+                        LOG.info("Got majority vote, serverId={} become leader", serverId);    // 自己的得票数超过半数了
+                        becomeLeader(); // 执行晋升 Leader 的操作
+                    }
+                } else {
+                    LOG.info("Vote denied by server {}, my term is {}",    // 如果收到的是否定票，直接打印日志不做处理
+                            peer.getServer().getServerId(), currentTerm);
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void fail(Throwable e) {
+
+        }
+    }
+
+    // 资格确认阶段
+    private void startQualificationConfirm() {
+        long start = System.currentTimeMillis();
+        lock.lock();
+        try {   // 如果配置中不包含自身，那么就不再继续后边的流程（本次的任务会被 cancel）
+            if (!ConfigurationUtils.containsServer(configuration, localServer.getServerId())) {
+                resetElectionTimer();
+                return;
+            }
+            LOG.info("Running pre-vote in term {}", currentTerm);
+        } finally {
+            lock.unlock();
+        }
+
+        for (RaftProto.Server server : configuration.getServersList()) {
+            if (server.getServerId() == localServer.getServerId()) {    // 配置中的节点，忽略自己
+                continue;
+            }
+            final Peer peer = peerMap.get(server.getServerId());    // 获取对应的 Peer 实例
+            executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    qualificationConfirm(peer);
+                }
+            });
+        }
+        long end = System.currentTimeMillis();
+        long rest = raftOptions.getQualificationConfirmTimeout() - (start - end);
+        try {
+            if (rest > 0)
+                Thread.sleep(rest);
+            startQualificationWrite();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startQualificationWrite() {
+        long start = System.currentTimeMillis();
+        lock.lock();
+        try {   // 如果配置中不包含自身，那么就不再继续后边的流程（本次的任务会被 cancel）
+            if (!ConfigurationUtils.containsServer(configuration, localServer.getServerId())) {
+                resetElectionTimer();
+                return;
+            }
+            LOG.info("Running pre-vote in term {}", currentTerm);
+        } finally {
+            lock.unlock();
+        }
+
+        if (qualificationConfirmOk) {   // 只有资格确认成功才能向其它节点发送资格写入请求
+            qualificationTable.add(localServer.getServerId());  // 将资格信息写入自己的资格表中
+            for (RaftProto.Server server : configuration.getServersList()) {
+                if (server.getServerId() == localServer.getServerId()) {    // 配置中的节点，忽略自己
+                    continue;
+                }
+                final Peer peer = peerMap.get(server.getServerId());    // 获取对应的 Peer 实例
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        qualificationWrite(peer);
+                    }
+                });
+            }
+        }
+        long end = System.currentTimeMillis();
+        long rest = raftOptions.getQualificationWriteTimeout() - (start - end);
+        try {
+            if (rest > 0)
+                Thread.sleep(rest);
+            startPriorityVote();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void qualificationWrite(Peer peer) {
+        LOG.info("begin qualification write request");
+        RaftProto.QualificationWriteRequest.Builder requestBuilder = RaftProto.QualificationWriteRequest.newBuilder();
+        lock.lock();
+        try {
+            peer.setVoteGranted(null);  // 构建的 VoteRequest 里边包含了必要的投票请求参数
+            requestBuilder.setServerId(localServer.getServerId());   // 自己的 ServerId
+        } finally {
+            lock.unlock();
+        }
+        RaftProto.QualificationWriteRequest request = requestBuilder.build(); // 构建真正的 VoteRequest
+        peer.getRaftConsensusServiceAsync().qualificationWrite(    // 通过代理类进行真正的 rpc 通信
+                request, new QualificationWriteResponseCallback(this, peer, request));   // request 是传输的内容
+    }
+
+    private void startPriorityVote() {
+        lock.lock();
+        try {   // 如果配置中不包含自身，那么就不再继续后边的流程（本次的任务会被 cancel）
+            if (!ConfigurationUtils.containsServer(configuration, localServer.getServerId())) {
+                resetElectionTimer();
+                return;
+            }
+            LOG.info("Running pre-vote in term {}", currentTerm);
+        } finally {
+            lock.unlock();
+        }
+
+        if (qualificationWriteOk) {   // 只有资格确认成功才能向其它节点发送资格写入请求
+            for (RaftProto.Server server : configuration.getServersList()) {
+                if (server.getServerId() == localServer.getServerId()) {    // 配置中的节点，忽略自己
+                    continue;
+                }
+                final Peer peer = peerMap.get(server.getServerId());    // 获取对应的 Peer 实例
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        priorityVote(peer);
+                    }
+                });
+            }
+        }
+    }
+
+    private void priorityVote(Peer peer) {
+        LOG.info("begin priority vote request");
+        RaftProto.PriorityVoteRequest.Builder requestBuilder = RaftProto.PriorityVoteRequest.newBuilder();
+        lock.lock();
+        try {
+            peer.setVoteGranted(null);  // 构建的 VoteRequest 里边包含了必要的投票请求参数
+            requestBuilder.setServerId(localServer.getServerId());   // 自己的 ServerId
+        } finally {
+            lock.unlock();
+        }
+        RaftProto.PriorityVoteRequest request = requestBuilder.build(); // 构建真正的 VoteRequest
+        peer.getRaftConsensusServiceAsync().priorityVote(    // 通过代理类进行真正的 rpc 通信
+                request, new PriorityVoteResponseCallback(this, peer, request));   // request 是传输的内容
+    }
+
+    private void qualificationConfirm(Peer peer) {
+        LOG.info("begin qualification confirm request");
+        RaftProto.QualificationConfirmRequest.Builder requestBuilder = RaftProto.QualificationConfirmRequest.newBuilder();
+        lock.lock();
+        try {
+            peer.setVoteGranted(null);  // 构建的 VoteRequest 里边包含了必要的投票请求参数
+            requestBuilder.setServerId(localServer.getServerId())   // 自己的 ServerId
+                    .setTerm(currentTerm)   // 当前的任期号
+                    .setLastLogIndex(raftLog.getLastLogIndex()) // 自己的最新日志索引号
+                    .setLastLogTerm(getLastLogTerm());  // 尝试获取最后一条日志项，如果日志不为空，就从日志中获取，否则获取快照的最后一条日志项
+        } finally {
+            lock.unlock();
+        }
+        RaftProto.QualificationConfirmRequest request = requestBuilder.build(); // 构建真正的 VoteRequest
+        peer.getRaftConsensusServiceAsync().qualificationConfirm(    // 通过代理类进行真正的 rpc 通信
+                request, new QualificationConfirmResponseCallback(this, peer, request));   // request 是传输的内容
     }
 
     private class VoteResponseCallback implements RpcCallback<RaftProto.VoteResponse> {
@@ -786,6 +1221,7 @@ public class RaftNode {
         }
         return lastIndex - nextIndex + 1;   // 返回批量操作的日志项数
     }
+
     // 向其它节点安装快照
     private boolean installSnapshot(Peer peer) {
         if (snapshot.getIsTakeSnapshot().get()) {   // 如果当前正在拍快照，那么就不能进行安装快照的操作
@@ -856,6 +1292,7 @@ public class RaftNode {
                 peer.getServer().getServerId(), isSuccess);
         return isSuccess;
     }
+
     // 构建 InstallSnapshotRequest，需要根据上一次操作的结果来决定本次请求的内容，比如数据长度，是否是第一或最后一个文件块
     private RaftProto.InstallSnapshotRequest buildInstallSnapshotRequest(
             TreeMap<String, Snapshot.SnapshotDataFile> snapshotDataFileMap,
@@ -929,6 +1366,23 @@ public class RaftNode {
         }
 
         return requestBuilder.build();
+    }
+
+    /**
+     * 判断 serverId 是否是资格表中优先级最高的节点
+     *
+     * @param serverId 节点 id
+     * @return 如果是优先级最高的节点，返回 true，否则返回 false
+     */
+    public boolean isHighestPriority(int serverId) {
+        for (Integer id : priorityTable) {
+            if (qualificationTable.contains(id)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
     }
 
     public Lock getLock() {
@@ -1009,5 +1463,29 @@ public class RaftNode {
 
     public Condition getCatchUpCondition() {
         return catchUpCondition;
+    }
+
+    public boolean isElectionLeader() {
+        return electionLeader;
+    }
+
+    public void setElectionLeader(boolean electionLeader) {
+        this.electionLeader = electionLeader;
+    }
+
+    public List<Integer> getQualificationTable() {
+        return qualificationTable;
+    }
+
+    public void setQualificationTable(List<Integer> qualificationTable) {
+        this.qualificationTable = qualificationTable;
+    }
+
+    public List<Integer> getPriorityTable() {
+        return priorityTable;
+    }
+
+    public void setPriorityTable(List<Integer> priorityTable) {
+        this.priorityTable = priorityTable;
     }
 }

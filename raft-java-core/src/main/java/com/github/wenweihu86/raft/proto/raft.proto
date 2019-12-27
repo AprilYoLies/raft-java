@@ -1,4 +1,4 @@
-syntax="proto2";
+syntax = "proto2";
 
 package raft;
 option java_package = "com.github.wenweihu86.raft.proto";
@@ -12,7 +12,7 @@ enum ResCode {
 
 enum EntryType {
     ENTRY_TYPE_DATA = 0;
-    ENTRY_TYPE_CONFIGURATION= 1;
+    ENTRY_TYPE_CONFIGURATION = 1;
 };
 
 message Endpoint {
@@ -127,3 +127,39 @@ message GetConfigurationResponse {
     optional Server leader = 3;
     repeated Server servers = 4;
 }
+
+message PrepareElectionRequest {
+
+}
+
+message PrepareElectionResponse {
+    optional bool granted = 2; // 响应的结果
+}
+
+message QualificationConfirmRequest {
+    optional uint32 server_id = 1; // 请求选票的候选人的 Id
+    optional uint64 term = 2; // 候选人的任期号
+    optional uint64 last_log_term = 3; // 候选人的最后日志条目的任期号
+    optional uint64 last_log_index = 4; // 候选人最后日志条目的索引值
+};
+
+message QualificationConfirmResponse {
+    optional uint64 term = 1; // 当前任期号，以便于候选人去更新自己的任期号
+    optional bool granted = 2; // 候选人赢得了此张选票时为真
+};
+
+message QualificationWriteRequest {
+    optional uint32 server_id = 1; // 候选人的 Id
+};
+
+message QualificationWriteResponse {
+    optional bool granted = 2; // 候选人赢得了此张选票时为真
+};
+
+message PriorityVoteRequest {
+    optional uint32 server_id = 1; // 候选人的 Id
+};
+
+message PriorityVoteResponse {
+    optional bool granted = 2; // 候选人赢得了此张选票时为真
+};

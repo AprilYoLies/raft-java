@@ -10,11 +10,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.rmi.runtime.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -62,6 +64,89 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
             raftNode.getLock().unlock();
         }
     }
+
+    @Override   // 节点收到 PrepareElectionRequest 请求后的处理方式，如果自己未进入 leader 选举阶段，就通知其它节点进入，然后响应当前的消息
+    public RaftProto.PrepareElectionResponse prepareElection(RaftProto.PrepareElectionRequest request) {
+        raftNode.getLock().lock();
+        try {
+            raftNode.resetElectionTimer();
+            if (!raftNode.isElectionLeader()) {
+                raftNode.setElectionLeader(true);
+                raftNode.startPrepareElection();
+            }
+            RaftProto.PrepareElectionResponse.Builder responseBuilder = RaftProto.PrepareElectionResponse.newBuilder();   // 构建 VoteResponse
+            responseBuilder.setGranted(true);  // 默认是 false
+            return responseBuilder.build(); // 返回响应的结果
+        } finally {
+            raftNode.getLock().unlock();
+        }
+    }
+
+    @Override
+    public RaftProto.QualificationConfirmResponse qualificationConfirm(RaftProto.QualificationConfirmRequest request) {
+        raftNode.getLock().lock();
+        try {
+            RaftProto.QualificationConfirmResponse.Builder responseBuilder = RaftProto.QualificationConfirmResponse.newBuilder();   // 构建 VoteResponse
+            responseBuilder.setGranted(false);  // 默认是 false
+            responseBuilder.setTerm(raftNode.getCurrentTerm()); // 自己的任期号
+            if (!ConfigurationUtils.containsServer(raftNode.getConfiguration(), request.getServerId())) {
+                return responseBuilder.build(); // 如果配置项中不包含请求投票的节点信息，直接否定
+            }
+            if (request.getTerm() < raftNode.getCurrentTerm()) {
+                return responseBuilder.build(); // 如果请求者的任期号不如自己的高，也需要否定
+            }
+            boolean isLogOk = request.getLastLogTerm() > raftNode.getLastLogTerm()  // 如果它的日志项任期比自己高
+                    || (request.getLastLogTerm() == raftNode.getLastLogTerm()   // 或者咱俩的日志的任期一致，但是它的索引大于等于自己的
+                    && request.getLastLogIndex() >= raftNode.getRaftLog().getLastLogIndex());
+            if (!isLogOk) {
+                return responseBuilder.build(); // 如果它的索引不如自己的新，需要投否定票
+            } else {
+                responseBuilder.setGranted(true);   // 否则设置赞成标记
+                responseBuilder.setTerm(raftNode.getCurrentTerm()); // 并将自己的任期号附带上
+            }
+            LOG.info("qualification confirm request from server {} " +
+                            "in term {} (my term is {}), granted={}",
+                    request.getServerId(), request.getTerm(),
+                    raftNode.getCurrentTerm(), responseBuilder.getGranted());   // 日志记录收到了谁的投票请求，它的任期是多少，然后我投了赞成还是否定票
+            return responseBuilder.build(); // 返回响应的结果
+        } finally {
+            raftNode.getLock().unlock();
+        }
+    }
+
+    @Override
+    public RaftProto.QualificationWriteResponse qualificationWrite(RaftProto.QualificationWriteRequest request) {
+        raftNode.getLock().lock();
+        try {
+            RaftProto.QualificationWriteResponse.Builder responseBuilder = RaftProto.QualificationWriteResponse.newBuilder();   // 构建 VoteResponse
+            responseBuilder.setGranted(false);  // 默认是 false
+            if (!ConfigurationUtils.containsServer(raftNode.getConfiguration(), request.getServerId())) {
+                return responseBuilder.build(); // 如果配置项中不包含请求投票的节点信息，直接否定
+            }
+            LOG.info("qualification write request. my term is {}, granted={}",
+                    raftNode.getCurrentTerm(), responseBuilder.getGranted());   // 日志记录收到了谁的投票请求，它的任期是多少，然后我投了赞成还是否定票
+            raftNode.getQualificationTable().add(request.getServerId());    // 将资格信息计入自己的资格表中
+            responseBuilder.setGranted(true);
+            return responseBuilder.build(); // 返回响应的结果
+        } finally {
+            raftNode.getLock().unlock();
+        }
+    }
+
+    @Override   // 基于节点优先级的 Leader 选举方案
+    public RaftProto.PriorityVoteResponse priorityVote(RaftProto.PriorityVoteRequest request) {
+        RaftProto.PriorityVoteResponse.Builder responseBuilder = RaftProto.PriorityVoteResponse.newBuilder();
+        responseBuilder.setGranted(false);
+        int serverId = request.getServerId();   // 获取请求投票节点的 id 号
+        LOG.info("priority vote request from server {}, the qualification table is [ {} ]",
+                serverId,
+                raftNode.getQualificationTable());
+        if (raftNode.isHighestPriority(serverId)) {    // 如果资格表中有当前节点信息
+            return responseBuilder.setGranted(true).build();
+        }
+        return responseBuilder.build(); // 其它情况一律否定
+    }
+
 
     @Override   // 节点收到投票请求后的操作，根据日志项的完整性及自己是否投了别人来决定自己的投票结果
     public RaftProto.VoteResponse requestVote(RaftProto.VoteRequest request) {
@@ -130,7 +215,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
 
             if (request.getPrevLogIndex() > raftNode.getRaftLog().getLastLogIndex()) {  // 如果自己没有上一条日志项
                 LOG.info("Rejecting AppendEntries RPC would leave gap, " +
-                        "request prevLogIndex={}, my lastLogIndex={}",
+                                "request prevLogIndex={}, my lastLogIndex={}",
                         request.getPrevLogIndex(), raftNode.getRaftLog().getLastLogIndex());
                 return responseBuilder.build(); // 响应追加失败，其实此时响应用已经有自己的最后一条日志项的索引值了
             }
@@ -138,7 +223,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                     && raftNode.getRaftLog().getEntryTerm(request.getPrevLogIndex())    // 且自己上一条日志项的任期和请求的不一致
                     != request.getPrevLogTerm()) {
                 LOG.info("Rejecting AppendEntries RPC: terms don't agree, " +   // 上一条日志项不匹配
-                        "request prevLogTerm={} in prevLogIndex={}, my is {}",
+                                "request prevLogTerm={} in prevLogIndex={}, my is {}",
                         request.getPrevLogTerm(), request.getPrevLogIndex(),
                         raftNode.getRaftLog().getEntryTerm(request.getPrevLogIndex()));
                 Validate.isTrue(request.getPrevLogIndex() > 0); // 上一条日志项的索引大于 0

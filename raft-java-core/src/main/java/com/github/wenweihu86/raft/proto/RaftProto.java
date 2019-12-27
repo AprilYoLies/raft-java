@@ -13760,6 +13760,3763 @@ public final class RaftProto {
     // @@protoc_insertion_point(class_scope:raft.GetConfigurationResponse)
   }
 
+  public interface PrepareElectionRequestOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * Protobuf type {@code raft.PrepareElectionRequest}
+   */
+  public static final class PrepareElectionRequest extends
+      com.google.protobuf.GeneratedMessage
+      implements PrepareElectionRequestOrBuilder {
+    // Use PrepareElectionRequest.newBuilder() to construct.
+    private PrepareElectionRequest(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private PrepareElectionRequest(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final PrepareElectionRequest defaultInstance;
+    public static PrepareElectionRequest getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public PrepareElectionRequest getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PrepareElectionRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionRequest_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest.class, com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<PrepareElectionRequest> PARSER =
+        new com.google.protobuf.AbstractParser<PrepareElectionRequest>() {
+      public PrepareElectionRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PrepareElectionRequest(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PrepareElectionRequest> getParserForType() {
+      return PARSER;
+    }
+
+    private void initFields() {
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code raft.PrepareElectionRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionRequest_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest.class, com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest.Builder.class);
+      }
+
+      // Construct using com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionRequest_descriptor;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest getDefaultInstanceForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest.getDefaultInstance();
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest build() {
+        com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest buildPartial() {
+        com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest result = new com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest) {
+          return mergeFrom((com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest other) {
+        if (other == com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionRequest) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:raft.PrepareElectionRequest)
+    }
+
+    static {
+      defaultInstance = new PrepareElectionRequest(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:raft.PrepareElectionRequest)
+  }
+
+  public interface PrepareElectionResponseOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bool granted = 2;
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 响应的结果
+     * </pre>
+     */
+    boolean hasGranted();
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 响应的结果
+     * </pre>
+     */
+    boolean getGranted();
+  }
+  /**
+   * Protobuf type {@code raft.PrepareElectionResponse}
+   */
+  public static final class PrepareElectionResponse extends
+      com.google.protobuf.GeneratedMessage
+      implements PrepareElectionResponseOrBuilder {
+    // Use PrepareElectionResponse.newBuilder() to construct.
+    private PrepareElectionResponse(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private PrepareElectionResponse(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final PrepareElectionResponse defaultInstance;
+    public static PrepareElectionResponse getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public PrepareElectionResponse getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PrepareElectionResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000001;
+              granted_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionResponse_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse.class, com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<PrepareElectionResponse> PARSER =
+        new com.google.protobuf.AbstractParser<PrepareElectionResponse>() {
+      public PrepareElectionResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PrepareElectionResponse(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PrepareElectionResponse> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bool granted = 2;
+    public static final int GRANTED_FIELD_NUMBER = 2;
+    private boolean granted_;
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 响应的结果
+     * </pre>
+     */
+    public boolean hasGranted() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 响应的结果
+     * </pre>
+     */
+    public boolean getGranted() {
+      return granted_;
+    }
+
+    private void initFields() {
+      granted_ = false;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBool(2, granted_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, granted_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code raft.PrepareElectionResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionResponse_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse.class, com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse.Builder.class);
+      }
+
+      // Construct using com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        granted_ = false;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PrepareElectionResponse_descriptor;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse getDefaultInstanceForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse.getDefaultInstance();
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse build() {
+        com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse buildPartial() {
+        com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse result = new com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.granted_ = granted_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse) {
+          return mergeFrom((com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse other) {
+        if (other == com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse.getDefaultInstance()) return this;
+        if (other.hasGranted()) {
+          setGranted(other.getGranted());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.github.wenweihu86.raft.proto.RaftProto.PrepareElectionResponse) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bool granted = 2;
+      private boolean granted_ ;
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 响应的结果
+       * </pre>
+       */
+      public boolean hasGranted() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 响应的结果
+       * </pre>
+       */
+      public boolean getGranted() {
+        return granted_;
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 响应的结果
+       * </pre>
+       */
+      public Builder setGranted(boolean value) {
+        bitField0_ |= 0x00000001;
+        granted_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 响应的结果
+       * </pre>
+       */
+      public Builder clearGranted() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        granted_ = false;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:raft.PrepareElectionResponse)
+    }
+
+    static {
+      defaultInstance = new PrepareElectionResponse(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:raft.PrepareElectionResponse)
+  }
+
+  public interface QualificationConfirmRequestOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional uint32 server_id = 1;
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 请求选票的候选人的 Id
+     * </pre>
+     */
+    boolean hasServerId();
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 请求选票的候选人的 Id
+     * </pre>
+     */
+    int getServerId();
+
+    // optional uint64 term = 2;
+    /**
+     * <code>optional uint64 term = 2;</code>
+     *
+     * <pre>
+     * 候选人的任期号
+     * </pre>
+     */
+    boolean hasTerm();
+    /**
+     * <code>optional uint64 term = 2;</code>
+     *
+     * <pre>
+     * 候选人的任期号
+     * </pre>
+     */
+    long getTerm();
+
+    // optional uint64 last_log_term = 3;
+    /**
+     * <code>optional uint64 last_log_term = 3;</code>
+     *
+     * <pre>
+     * 候选人的最后日志条目的任期号
+     * </pre>
+     */
+    boolean hasLastLogTerm();
+    /**
+     * <code>optional uint64 last_log_term = 3;</code>
+     *
+     * <pre>
+     * 候选人的最后日志条目的任期号
+     * </pre>
+     */
+    long getLastLogTerm();
+
+    // optional uint64 last_log_index = 4;
+    /**
+     * <code>optional uint64 last_log_index = 4;</code>
+     *
+     * <pre>
+     * 候选人最后日志条目的索引值
+     * </pre>
+     */
+    boolean hasLastLogIndex();
+    /**
+     * <code>optional uint64 last_log_index = 4;</code>
+     *
+     * <pre>
+     * 候选人最后日志条目的索引值
+     * </pre>
+     */
+    long getLastLogIndex();
+  }
+  /**
+   * Protobuf type {@code raft.QualificationConfirmRequest}
+   */
+  public static final class QualificationConfirmRequest extends
+      com.google.protobuf.GeneratedMessage
+      implements QualificationConfirmRequestOrBuilder {
+    // Use QualificationConfirmRequest.newBuilder() to construct.
+    private QualificationConfirmRequest(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private QualificationConfirmRequest(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final QualificationConfirmRequest defaultInstance;
+    public static QualificationConfirmRequest getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public QualificationConfirmRequest getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private QualificationConfirmRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              serverId_ = input.readUInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              term_ = input.readUInt64();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              lastLogTerm_ = input.readUInt64();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              lastLogIndex_ = input.readUInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmRequest_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest.class, com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<QualificationConfirmRequest> PARSER =
+        new com.google.protobuf.AbstractParser<QualificationConfirmRequest>() {
+      public QualificationConfirmRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new QualificationConfirmRequest(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<QualificationConfirmRequest> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional uint32 server_id = 1;
+    public static final int SERVER_ID_FIELD_NUMBER = 1;
+    private int serverId_;
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 请求选票的候选人的 Id
+     * </pre>
+     */
+    public boolean hasServerId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 请求选票的候选人的 Id
+     * </pre>
+     */
+    public int getServerId() {
+      return serverId_;
+    }
+
+    // optional uint64 term = 2;
+    public static final int TERM_FIELD_NUMBER = 2;
+    private long term_;
+    /**
+     * <code>optional uint64 term = 2;</code>
+     *
+     * <pre>
+     * 候选人的任期号
+     * </pre>
+     */
+    public boolean hasTerm() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional uint64 term = 2;</code>
+     *
+     * <pre>
+     * 候选人的任期号
+     * </pre>
+     */
+    public long getTerm() {
+      return term_;
+    }
+
+    // optional uint64 last_log_term = 3;
+    public static final int LAST_LOG_TERM_FIELD_NUMBER = 3;
+    private long lastLogTerm_;
+    /**
+     * <code>optional uint64 last_log_term = 3;</code>
+     *
+     * <pre>
+     * 候选人的最后日志条目的任期号
+     * </pre>
+     */
+    public boolean hasLastLogTerm() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional uint64 last_log_term = 3;</code>
+     *
+     * <pre>
+     * 候选人的最后日志条目的任期号
+     * </pre>
+     */
+    public long getLastLogTerm() {
+      return lastLogTerm_;
+    }
+
+    // optional uint64 last_log_index = 4;
+    public static final int LAST_LOG_INDEX_FIELD_NUMBER = 4;
+    private long lastLogIndex_;
+    /**
+     * <code>optional uint64 last_log_index = 4;</code>
+     *
+     * <pre>
+     * 候选人最后日志条目的索引值
+     * </pre>
+     */
+    public boolean hasLastLogIndex() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional uint64 last_log_index = 4;</code>
+     *
+     * <pre>
+     * 候选人最后日志条目的索引值
+     * </pre>
+     */
+    public long getLastLogIndex() {
+      return lastLogIndex_;
+    }
+
+    private void initFields() {
+      serverId_ = 0;
+      term_ = 0L;
+      lastLogTerm_ = 0L;
+      lastLogIndex_ = 0L;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeUInt32(1, serverId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeUInt64(2, term_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeUInt64(3, lastLogTerm_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeUInt64(4, lastLogIndex_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, serverId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(2, term_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(3, lastLogTerm_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(4, lastLogIndex_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code raft.QualificationConfirmRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmRequest_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest.class, com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest.Builder.class);
+      }
+
+      // Construct using com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        serverId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        term_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        lastLogTerm_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        lastLogIndex_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmRequest_descriptor;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest getDefaultInstanceForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest.getDefaultInstance();
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest build() {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest buildPartial() {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest result = new com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.serverId_ = serverId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.term_ = term_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.lastLogTerm_ = lastLogTerm_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.lastLogIndex_ = lastLogIndex_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest) {
+          return mergeFrom((com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest other) {
+        if (other == com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest.getDefaultInstance()) return this;
+        if (other.hasServerId()) {
+          setServerId(other.getServerId());
+        }
+        if (other.hasTerm()) {
+          setTerm(other.getTerm());
+        }
+        if (other.hasLastLogTerm()) {
+          setLastLogTerm(other.getLastLogTerm());
+        }
+        if (other.hasLastLogIndex()) {
+          setLastLogIndex(other.getLastLogIndex());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmRequest) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional uint32 server_id = 1;
+      private int serverId_ ;
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 请求选票的候选人的 Id
+       * </pre>
+       */
+      public boolean hasServerId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 请求选票的候选人的 Id
+       * </pre>
+       */
+      public int getServerId() {
+        return serverId_;
+      }
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 请求选票的候选人的 Id
+       * </pre>
+       */
+      public Builder setServerId(int value) {
+        bitField0_ |= 0x00000001;
+        serverId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 请求选票的候选人的 Id
+       * </pre>
+       */
+      public Builder clearServerId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        serverId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional uint64 term = 2;
+      private long term_ ;
+      /**
+       * <code>optional uint64 term = 2;</code>
+       *
+       * <pre>
+       * 候选人的任期号
+       * </pre>
+       */
+      public boolean hasTerm() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional uint64 term = 2;</code>
+       *
+       * <pre>
+       * 候选人的任期号
+       * </pre>
+       */
+      public long getTerm() {
+        return term_;
+      }
+      /**
+       * <code>optional uint64 term = 2;</code>
+       *
+       * <pre>
+       * 候选人的任期号
+       * </pre>
+       */
+      public Builder setTerm(long value) {
+        bitField0_ |= 0x00000002;
+        term_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint64 term = 2;</code>
+       *
+       * <pre>
+       * 候选人的任期号
+       * </pre>
+       */
+      public Builder clearTerm() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        term_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // optional uint64 last_log_term = 3;
+      private long lastLogTerm_ ;
+      /**
+       * <code>optional uint64 last_log_term = 3;</code>
+       *
+       * <pre>
+       * 候选人的最后日志条目的任期号
+       * </pre>
+       */
+      public boolean hasLastLogTerm() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional uint64 last_log_term = 3;</code>
+       *
+       * <pre>
+       * 候选人的最后日志条目的任期号
+       * </pre>
+       */
+      public long getLastLogTerm() {
+        return lastLogTerm_;
+      }
+      /**
+       * <code>optional uint64 last_log_term = 3;</code>
+       *
+       * <pre>
+       * 候选人的最后日志条目的任期号
+       * </pre>
+       */
+      public Builder setLastLogTerm(long value) {
+        bitField0_ |= 0x00000004;
+        lastLogTerm_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint64 last_log_term = 3;</code>
+       *
+       * <pre>
+       * 候选人的最后日志条目的任期号
+       * </pre>
+       */
+      public Builder clearLastLogTerm() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        lastLogTerm_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // optional uint64 last_log_index = 4;
+      private long lastLogIndex_ ;
+      /**
+       * <code>optional uint64 last_log_index = 4;</code>
+       *
+       * <pre>
+       * 候选人最后日志条目的索引值
+       * </pre>
+       */
+      public boolean hasLastLogIndex() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional uint64 last_log_index = 4;</code>
+       *
+       * <pre>
+       * 候选人最后日志条目的索引值
+       * </pre>
+       */
+      public long getLastLogIndex() {
+        return lastLogIndex_;
+      }
+      /**
+       * <code>optional uint64 last_log_index = 4;</code>
+       *
+       * <pre>
+       * 候选人最后日志条目的索引值
+       * </pre>
+       */
+      public Builder setLastLogIndex(long value) {
+        bitField0_ |= 0x00000008;
+        lastLogIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint64 last_log_index = 4;</code>
+       *
+       * <pre>
+       * 候选人最后日志条目的索引值
+       * </pre>
+       */
+      public Builder clearLastLogIndex() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        lastLogIndex_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:raft.QualificationConfirmRequest)
+    }
+
+    static {
+      defaultInstance = new QualificationConfirmRequest(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:raft.QualificationConfirmRequest)
+  }
+
+  public interface QualificationConfirmResponseOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional uint64 term = 1;
+    /**
+     * <code>optional uint64 term = 1;</code>
+     *
+     * <pre>
+     * 当前任期号，以便于候选人去更新自己的任期号
+     * </pre>
+     */
+    boolean hasTerm();
+    /**
+     * <code>optional uint64 term = 1;</code>
+     *
+     * <pre>
+     * 当前任期号，以便于候选人去更新自己的任期号
+     * </pre>
+     */
+    long getTerm();
+
+    // optional bool granted = 2;
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    boolean hasGranted();
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    boolean getGranted();
+  }
+  /**
+   * Protobuf type {@code raft.QualificationConfirmResponse}
+   */
+  public static final class QualificationConfirmResponse extends
+      com.google.protobuf.GeneratedMessage
+      implements QualificationConfirmResponseOrBuilder {
+    // Use QualificationConfirmResponse.newBuilder() to construct.
+    private QualificationConfirmResponse(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private QualificationConfirmResponse(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final QualificationConfirmResponse defaultInstance;
+    public static QualificationConfirmResponse getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public QualificationConfirmResponse getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private QualificationConfirmResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              term_ = input.readUInt64();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              granted_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmResponse_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse.class, com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<QualificationConfirmResponse> PARSER =
+        new com.google.protobuf.AbstractParser<QualificationConfirmResponse>() {
+      public QualificationConfirmResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new QualificationConfirmResponse(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<QualificationConfirmResponse> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional uint64 term = 1;
+    public static final int TERM_FIELD_NUMBER = 1;
+    private long term_;
+    /**
+     * <code>optional uint64 term = 1;</code>
+     *
+     * <pre>
+     * 当前任期号，以便于候选人去更新自己的任期号
+     * </pre>
+     */
+    public boolean hasTerm() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional uint64 term = 1;</code>
+     *
+     * <pre>
+     * 当前任期号，以便于候选人去更新自己的任期号
+     * </pre>
+     */
+    public long getTerm() {
+      return term_;
+    }
+
+    // optional bool granted = 2;
+    public static final int GRANTED_FIELD_NUMBER = 2;
+    private boolean granted_;
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    public boolean hasGranted() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    public boolean getGranted() {
+      return granted_;
+    }
+
+    private void initFields() {
+      term_ = 0L;
+      granted_ = false;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeUInt64(1, term_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBool(2, granted_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(1, term_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, granted_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code raft.QualificationConfirmResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmResponse_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse.class, com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse.Builder.class);
+      }
+
+      // Construct using com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        term_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        granted_ = false;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationConfirmResponse_descriptor;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse getDefaultInstanceForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse.getDefaultInstance();
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse build() {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse buildPartial() {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse result = new com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.term_ = term_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.granted_ = granted_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse) {
+          return mergeFrom((com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse other) {
+        if (other == com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse.getDefaultInstance()) return this;
+        if (other.hasTerm()) {
+          setTerm(other.getTerm());
+        }
+        if (other.hasGranted()) {
+          setGranted(other.getGranted());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.github.wenweihu86.raft.proto.RaftProto.QualificationConfirmResponse) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional uint64 term = 1;
+      private long term_ ;
+      /**
+       * <code>optional uint64 term = 1;</code>
+       *
+       * <pre>
+       * 当前任期号，以便于候选人去更新自己的任期号
+       * </pre>
+       */
+      public boolean hasTerm() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional uint64 term = 1;</code>
+       *
+       * <pre>
+       * 当前任期号，以便于候选人去更新自己的任期号
+       * </pre>
+       */
+      public long getTerm() {
+        return term_;
+      }
+      /**
+       * <code>optional uint64 term = 1;</code>
+       *
+       * <pre>
+       * 当前任期号，以便于候选人去更新自己的任期号
+       * </pre>
+       */
+      public Builder setTerm(long value) {
+        bitField0_ |= 0x00000001;
+        term_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint64 term = 1;</code>
+       *
+       * <pre>
+       * 当前任期号，以便于候选人去更新自己的任期号
+       * </pre>
+       */
+      public Builder clearTerm() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        term_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // optional bool granted = 2;
+      private boolean granted_ ;
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public boolean hasGranted() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public boolean getGranted() {
+        return granted_;
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public Builder setGranted(boolean value) {
+        bitField0_ |= 0x00000002;
+        granted_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public Builder clearGranted() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        granted_ = false;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:raft.QualificationConfirmResponse)
+    }
+
+    static {
+      defaultInstance = new QualificationConfirmResponse(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:raft.QualificationConfirmResponse)
+  }
+
+  public interface QualificationWriteRequestOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional uint32 server_id = 1;
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 候选人的 Id
+     * </pre>
+     */
+    boolean hasServerId();
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 候选人的 Id
+     * </pre>
+     */
+    int getServerId();
+  }
+  /**
+   * Protobuf type {@code raft.QualificationWriteRequest}
+   */
+  public static final class QualificationWriteRequest extends
+      com.google.protobuf.GeneratedMessage
+      implements QualificationWriteRequestOrBuilder {
+    // Use QualificationWriteRequest.newBuilder() to construct.
+    private QualificationWriteRequest(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private QualificationWriteRequest(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final QualificationWriteRequest defaultInstance;
+    public static QualificationWriteRequest getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public QualificationWriteRequest getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private QualificationWriteRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              serverId_ = input.readUInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteRequest_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest.class, com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<QualificationWriteRequest> PARSER =
+        new com.google.protobuf.AbstractParser<QualificationWriteRequest>() {
+      public QualificationWriteRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new QualificationWriteRequest(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<QualificationWriteRequest> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional uint32 server_id = 1;
+    public static final int SERVER_ID_FIELD_NUMBER = 1;
+    private int serverId_;
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 候选人的 Id
+     * </pre>
+     */
+    public boolean hasServerId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 候选人的 Id
+     * </pre>
+     */
+    public int getServerId() {
+      return serverId_;
+    }
+
+    private void initFields() {
+      serverId_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeUInt32(1, serverId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, serverId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code raft.QualificationWriteRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteRequest_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest.class, com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest.Builder.class);
+      }
+
+      // Construct using com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        serverId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteRequest_descriptor;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest getDefaultInstanceForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest.getDefaultInstance();
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest build() {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest buildPartial() {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest result = new com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.serverId_ = serverId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest) {
+          return mergeFrom((com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest other) {
+        if (other == com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest.getDefaultInstance()) return this;
+        if (other.hasServerId()) {
+          setServerId(other.getServerId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteRequest) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional uint32 server_id = 1;
+      private int serverId_ ;
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 候选人的 Id
+       * </pre>
+       */
+      public boolean hasServerId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 候选人的 Id
+       * </pre>
+       */
+      public int getServerId() {
+        return serverId_;
+      }
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 候选人的 Id
+       * </pre>
+       */
+      public Builder setServerId(int value) {
+        bitField0_ |= 0x00000001;
+        serverId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 候选人的 Id
+       * </pre>
+       */
+      public Builder clearServerId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        serverId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:raft.QualificationWriteRequest)
+    }
+
+    static {
+      defaultInstance = new QualificationWriteRequest(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:raft.QualificationWriteRequest)
+  }
+
+  public interface QualificationWriteResponseOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bool granted = 2;
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    boolean hasGranted();
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    boolean getGranted();
+  }
+  /**
+   * Protobuf type {@code raft.QualificationWriteResponse}
+   */
+  public static final class QualificationWriteResponse extends
+      com.google.protobuf.GeneratedMessage
+      implements QualificationWriteResponseOrBuilder {
+    // Use QualificationWriteResponse.newBuilder() to construct.
+    private QualificationWriteResponse(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private QualificationWriteResponse(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final QualificationWriteResponse defaultInstance;
+    public static QualificationWriteResponse getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public QualificationWriteResponse getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private QualificationWriteResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000001;
+              granted_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteResponse_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse.class, com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<QualificationWriteResponse> PARSER =
+        new com.google.protobuf.AbstractParser<QualificationWriteResponse>() {
+      public QualificationWriteResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new QualificationWriteResponse(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<QualificationWriteResponse> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bool granted = 2;
+    public static final int GRANTED_FIELD_NUMBER = 2;
+    private boolean granted_;
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    public boolean hasGranted() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    public boolean getGranted() {
+      return granted_;
+    }
+
+    private void initFields() {
+      granted_ = false;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBool(2, granted_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, granted_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code raft.QualificationWriteResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteResponse_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse.class, com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse.Builder.class);
+      }
+
+      // Construct using com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        granted_ = false;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_QualificationWriteResponse_descriptor;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse getDefaultInstanceForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse.getDefaultInstance();
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse build() {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse buildPartial() {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse result = new com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.granted_ = granted_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse) {
+          return mergeFrom((com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse other) {
+        if (other == com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse.getDefaultInstance()) return this;
+        if (other.hasGranted()) {
+          setGranted(other.getGranted());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.github.wenweihu86.raft.proto.RaftProto.QualificationWriteResponse) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bool granted = 2;
+      private boolean granted_ ;
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public boolean hasGranted() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public boolean getGranted() {
+        return granted_;
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public Builder setGranted(boolean value) {
+        bitField0_ |= 0x00000001;
+        granted_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public Builder clearGranted() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        granted_ = false;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:raft.QualificationWriteResponse)
+    }
+
+    static {
+      defaultInstance = new QualificationWriteResponse(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:raft.QualificationWriteResponse)
+  }
+
+  public interface PriorityVoteRequestOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional uint32 server_id = 1;
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 候选人的 Id
+     * </pre>
+     */
+    boolean hasServerId();
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 候选人的 Id
+     * </pre>
+     */
+    int getServerId();
+  }
+  /**
+   * Protobuf type {@code raft.PriorityVoteRequest}
+   */
+  public static final class PriorityVoteRequest extends
+      com.google.protobuf.GeneratedMessage
+      implements PriorityVoteRequestOrBuilder {
+    // Use PriorityVoteRequest.newBuilder() to construct.
+    private PriorityVoteRequest(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private PriorityVoteRequest(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final PriorityVoteRequest defaultInstance;
+    public static PriorityVoteRequest getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public PriorityVoteRequest getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PriorityVoteRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              serverId_ = input.readUInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteRequest_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest.class, com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<PriorityVoteRequest> PARSER =
+        new com.google.protobuf.AbstractParser<PriorityVoteRequest>() {
+      public PriorityVoteRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PriorityVoteRequest(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PriorityVoteRequest> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional uint32 server_id = 1;
+    public static final int SERVER_ID_FIELD_NUMBER = 1;
+    private int serverId_;
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 候选人的 Id
+     * </pre>
+     */
+    public boolean hasServerId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional uint32 server_id = 1;</code>
+     *
+     * <pre>
+     * 候选人的 Id
+     * </pre>
+     */
+    public int getServerId() {
+      return serverId_;
+    }
+
+    private void initFields() {
+      serverId_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeUInt32(1, serverId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, serverId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code raft.PriorityVoteRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteRequest_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest.class, com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest.Builder.class);
+      }
+
+      // Construct using com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        serverId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteRequest_descriptor;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest getDefaultInstanceForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest.getDefaultInstance();
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest build() {
+        com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest buildPartial() {
+        com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest result = new com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.serverId_ = serverId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest) {
+          return mergeFrom((com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest other) {
+        if (other == com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest.getDefaultInstance()) return this;
+        if (other.hasServerId()) {
+          setServerId(other.getServerId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteRequest) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional uint32 server_id = 1;
+      private int serverId_ ;
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 候选人的 Id
+       * </pre>
+       */
+      public boolean hasServerId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 候选人的 Id
+       * </pre>
+       */
+      public int getServerId() {
+        return serverId_;
+      }
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 候选人的 Id
+       * </pre>
+       */
+      public Builder setServerId(int value) {
+        bitField0_ |= 0x00000001;
+        serverId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 server_id = 1;</code>
+       *
+       * <pre>
+       * 候选人的 Id
+       * </pre>
+       */
+      public Builder clearServerId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        serverId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:raft.PriorityVoteRequest)
+    }
+
+    static {
+      defaultInstance = new PriorityVoteRequest(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:raft.PriorityVoteRequest)
+  }
+
+  public interface PriorityVoteResponseOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bool granted = 2;
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    boolean hasGranted();
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    boolean getGranted();
+  }
+  /**
+   * Protobuf type {@code raft.PriorityVoteResponse}
+   */
+  public static final class PriorityVoteResponse extends
+      com.google.protobuf.GeneratedMessage
+      implements PriorityVoteResponseOrBuilder {
+    // Use PriorityVoteResponse.newBuilder() to construct.
+    private PriorityVoteResponse(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private PriorityVoteResponse(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final PriorityVoteResponse defaultInstance;
+    public static PriorityVoteResponse getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public PriorityVoteResponse getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private PriorityVoteResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000001;
+              granted_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteResponse_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse.class, com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<PriorityVoteResponse> PARSER =
+        new com.google.protobuf.AbstractParser<PriorityVoteResponse>() {
+      public PriorityVoteResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new PriorityVoteResponse(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<PriorityVoteResponse> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bool granted = 2;
+    public static final int GRANTED_FIELD_NUMBER = 2;
+    private boolean granted_;
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    public boolean hasGranted() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bool granted = 2;</code>
+     *
+     * <pre>
+     * 候选人赢得了此张选票时为真
+     * </pre>
+     */
+    public boolean getGranted() {
+      return granted_;
+    }
+
+    private void initFields() {
+      granted_ = false;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBool(2, granted_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, granted_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code raft.PriorityVoteResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteResponse_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse.class, com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse.Builder.class);
+      }
+
+      // Construct using com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        granted_ = false;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.internal_static_raft_PriorityVoteResponse_descriptor;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse getDefaultInstanceForType() {
+        return com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse.getDefaultInstance();
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse build() {
+        com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse buildPartial() {
+        com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse result = new com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.granted_ = granted_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse) {
+          return mergeFrom((com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse other) {
+        if (other == com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse.getDefaultInstance()) return this;
+        if (other.hasGranted()) {
+          setGranted(other.getGranted());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.github.wenweihu86.raft.proto.RaftProto.PriorityVoteResponse) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bool granted = 2;
+      private boolean granted_ ;
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public boolean hasGranted() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public boolean getGranted() {
+        return granted_;
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public Builder setGranted(boolean value) {
+        bitField0_ |= 0x00000001;
+        granted_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool granted = 2;</code>
+       *
+       * <pre>
+       * 候选人赢得了此张选票时为真
+       * </pre>
+       */
+      public Builder clearGranted() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        granted_ = false;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:raft.PriorityVoteResponse)
+    }
+
+    static {
+      defaultInstance = new PriorityVoteResponse(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:raft.PriorityVoteResponse)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_raft_Endpoint_descriptor;
   private static
@@ -13860,6 +17617,46 @@ public final class RaftProto {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_raft_GetConfigurationResponse_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_raft_PrepareElectionRequest_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_raft_PrepareElectionRequest_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_raft_PrepareElectionResponse_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_raft_PrepareElectionResponse_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_raft_QualificationConfirmRequest_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_raft_QualificationConfirmRequest_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_raft_QualificationConfirmResponse_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_raft_QualificationConfirmResponse_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_raft_QualificationWriteRequest_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_raft_QualificationWriteRequest_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_raft_QualificationWriteResponse_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_raft_QualificationWriteResponse_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_raft_PriorityVoteRequest_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_raft_PriorityVoteRequest_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_raft_PriorityVoteResponse_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_raft_PriorityVoteResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -13910,12 +17707,22 @@ public final class RaftProto {
       "t\"\211\001\n\030GetConfigurationResponse\022\037\n\010res_co" +
       "de\030\001 \001(\0162\r.raft.ResCode\022\017\n\007res_msg\030\002 \001(\t",
       "\022\034\n\006leader\030\003 \001(\0132\014.raft.Server\022\035\n\007server" +
-      "s\030\004 \003(\0132\014.raft.Server*K\n\007ResCode\022\024\n\020RES_" +
-      "CODE_SUCCESS\020\000\022\021\n\rRES_CODE_FAIL\020\001\022\027\n\023RES" +
-      "_CODE_NOT_LEADER\020\002*>\n\tEntryType\022\023\n\017ENTRY" +
-      "_TYPE_DATA\020\000\022\034\n\030ENTRY_TYPE_CONFIGURATION" +
-      "\020\001B-\n com.github.wenweihu86.raft.protoB\t" +
-      "RaftProto"
+      "s\030\004 \003(\0132\014.raft.Server\"\030\n\026PrepareElection" +
+      "Request\"*\n\027PrepareElectionResponse\022\017\n\007gr" +
+      "anted\030\002 \001(\010\"m\n\033QualificationConfirmReque" +
+      "st\022\021\n\tserver_id\030\001 \001(\r\022\014\n\004term\030\002 \001(\004\022\025\n\rl" +
+      "ast_log_term\030\003 \001(\004\022\026\n\016last_log_index\030\004 \001" +
+      "(\004\"=\n\034QualificationConfirmResponse\022\014\n\004te" +
+      "rm\030\001 \001(\004\022\017\n\007granted\030\002 \001(\010\".\n\031Qualificati" +
+      "onWriteRequest\022\021\n\tserver_id\030\001 \001(\r\"-\n\032Qua" +
+      "lificationWriteResponse\022\017\n\007granted\030\002 \001(\010",
+      "\"(\n\023PriorityVoteRequest\022\021\n\tserver_id\030\001 \001" +
+      "(\r\"\'\n\024PriorityVoteResponse\022\017\n\007granted\030\002 " +
+      "\001(\010*K\n\007ResCode\022\024\n\020RES_CODE_SUCCESS\020\000\022\021\n\r" +
+      "RES_CODE_FAIL\020\001\022\027\n\023RES_CODE_NOT_LEADER\020\002" +
+      "*>\n\tEntryType\022\023\n\017ENTRY_TYPE_DATA\020\000\022\034\n\030EN" +
+      "TRY_TYPE_CONFIGURATION\020\001B-\n com.github.w" +
+      "enweihu86.raft.protoB\tRaftProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -14042,6 +17849,54 @@ public final class RaftProto {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_raft_GetConfigurationResponse_descriptor,
               new java.lang.String[] { "ResCode", "ResMsg", "Leader", "Servers", });
+          internal_static_raft_PrepareElectionRequest_descriptor =
+            getDescriptor().getMessageTypes().get(20);
+          internal_static_raft_PrepareElectionRequest_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_raft_PrepareElectionRequest_descriptor,
+              new java.lang.String[] { });
+          internal_static_raft_PrepareElectionResponse_descriptor =
+            getDescriptor().getMessageTypes().get(21);
+          internal_static_raft_PrepareElectionResponse_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_raft_PrepareElectionResponse_descriptor,
+              new java.lang.String[] { "Granted", });
+          internal_static_raft_QualificationConfirmRequest_descriptor =
+            getDescriptor().getMessageTypes().get(22);
+          internal_static_raft_QualificationConfirmRequest_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_raft_QualificationConfirmRequest_descriptor,
+              new java.lang.String[] { "ServerId", "Term", "LastLogTerm", "LastLogIndex", });
+          internal_static_raft_QualificationConfirmResponse_descriptor =
+            getDescriptor().getMessageTypes().get(23);
+          internal_static_raft_QualificationConfirmResponse_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_raft_QualificationConfirmResponse_descriptor,
+              new java.lang.String[] { "Term", "Granted", });
+          internal_static_raft_QualificationWriteRequest_descriptor =
+            getDescriptor().getMessageTypes().get(24);
+          internal_static_raft_QualificationWriteRequest_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_raft_QualificationWriteRequest_descriptor,
+              new java.lang.String[] { "ServerId", });
+          internal_static_raft_QualificationWriteResponse_descriptor =
+            getDescriptor().getMessageTypes().get(25);
+          internal_static_raft_QualificationWriteResponse_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_raft_QualificationWriteResponse_descriptor,
+              new java.lang.String[] { "Granted", });
+          internal_static_raft_PriorityVoteRequest_descriptor =
+            getDescriptor().getMessageTypes().get(26);
+          internal_static_raft_PriorityVoteRequest_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_raft_PriorityVoteRequest_descriptor,
+              new java.lang.String[] { "ServerId", });
+          internal_static_raft_PriorityVoteResponse_descriptor =
+            getDescriptor().getMessageTypes().get(27);
+          internal_static_raft_PriorityVoteResponse_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_raft_PriorityVoteResponse_descriptor,
+              new java.lang.String[] { "Granted", });
           return null;
         }
       };
