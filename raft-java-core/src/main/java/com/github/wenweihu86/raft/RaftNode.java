@@ -469,6 +469,14 @@ public class RaftNode {
         }
     }
 
+    // 清空 Leader 选举选举先关的参数
+    private void clearElectionFlags() {
+        this.electionLeader = false;
+        this.qualificationConfirmOk = false;
+        this.qualificationWriteOk = false;
+        qualificationTable.clear();
+    }
+
     public void startPrepareElection() {
         lock.lock();
         try {   // 如果配置中不包含自身，那么就不再继续后边的流程（本次的任务会被 cancel）
@@ -914,6 +922,7 @@ public class RaftNode {
 
     // 资格确认阶段
     public void startQualificationConfirm() {
+        clearElectionFlags();
         long start = System.currentTimeMillis();
         lock.lock();
         setElectionLeader(true);    // 标记自己进入 Leader 竞选阶段
@@ -947,13 +956,6 @@ public class RaftNode {
             startQualificationWrite();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void printLines() throws InterruptedException {
-        for (int i = 0; i < 1000; i++) {
-            System.out.println("----------------------------------------------------");
-            Thread.sleep(500);
         }
     }
 
