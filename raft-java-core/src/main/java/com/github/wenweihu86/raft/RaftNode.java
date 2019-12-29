@@ -71,7 +71,7 @@ public class RaftNode {
     // 优先级表
     private List<Integer> priorityTable = new ArrayList<>();
 
-    private List<Integer> qualificationTable = new ArrayList<>();
+    private Set<Integer> qualificationTable = Collections.synchronizedSet(new HashSet<Integer>());
 
     private ExecutorService executorService;
     private ScheduledExecutorService scheduledExecutorService;
@@ -740,7 +740,6 @@ public class RaftNode {
                     if (prepareElectionGrantedNum > configuration.getServersCount() / 2) { // 如果得票数超过半数
                         LOG.info("get majority grants, serverId={} when prepare election, start election",
                                 localServer.getServerId());
-                        startQualificationConfirm();    // 资格确认阶段
                     }
                 } else {
                     LOG.info("prepare election denied by server {}, my term is {}",
@@ -749,6 +748,7 @@ public class RaftNode {
             } finally {
                 lock.unlock();
             }
+            startQualificationConfirm();    // 资格确认阶段
         }
 
         @Override
@@ -794,7 +794,7 @@ public class RaftNode {
                         this.raftNode.qualificationConfirmOk = true;
                     }
                 } else {
-                    LOG.info("prepare election denied by server {}, my term is {}",
+                    LOG.info("qualification confirm denied by server {}, my term is {}",
                             peer.getServer().getServerId(), currentTerm);
                 }
             } finally {
@@ -913,15 +913,16 @@ public class RaftNode {
     }
 
     // 资格确认阶段
-    private void startQualificationConfirm() {
+    public void startQualificationConfirm() {
         long start = System.currentTimeMillis();
         lock.lock();
+        setElectionLeader(true);    // 标记自己进入 Leader 竞选阶段
         try {   // 如果配置中不包含自身，那么就不再继续后边的流程（本次的任务会被 cancel）
             if (!ConfigurationUtils.containsServer(configuration, localServer.getServerId())) {
                 resetElectionTimer();
                 return;
             }
-            LOG.info("Running pre-vote in term {}", currentTerm);
+            LOG.info("Running qualification confirm in term {}", currentTerm);
         } finally {
             lock.unlock();
         }
@@ -939,7 +940,7 @@ public class RaftNode {
             });
         }
         long end = System.currentTimeMillis();
-        long rest = raftOptions.getQualificationConfirmTimeout() - (start - end);
+        long rest = raftOptions.getQualificationConfirmTimeout() - (end - start);
         try {
             if (rest > 0)
                 Thread.sleep(rest);
@@ -949,6 +950,14 @@ public class RaftNode {
         }
     }
 
+    private void printLines() throws InterruptedException {
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("----------------------------------------------------");
+            Thread.sleep(500);
+        }
+    }
+
+    // 开始资格写入
     private void startQualificationWrite() {
         long start = System.currentTimeMillis();
         lock.lock();
@@ -972,13 +981,13 @@ public class RaftNode {
                 executorService.submit(new Runnable() {
                     @Override
                     public void run() {
-                        qualificationWrite(peer);
+                        qualificationWrite(peer);   // 向 peer 发起资格写入请求
                     }
                 });
             }
         }
         long end = System.currentTimeMillis();
-        long rest = raftOptions.getQualificationWriteTimeout() - (start - end);
+        long rest = raftOptions.getQualificationWriteTimeout() - (end - start);
         try {
             if (rest > 0)
                 Thread.sleep(rest);
@@ -988,6 +997,7 @@ public class RaftNode {
         }
     }
 
+    // 发起资格写入请求
     private void qualificationWrite(Peer peer) {
         LOG.info("begin qualification write request");
         RaftProto.QualificationWriteRequest.Builder requestBuilder = RaftProto.QualificationWriteRequest.newBuilder();
@@ -1377,9 +1387,7 @@ public class RaftNode {
     public boolean isHighestPriority(int serverId) {
         for (Integer id : priorityTable) {
             if (qualificationTable.contains(id)) {
-                return true;
-            } else {
-                return false;
+                return serverId == id;
             }
         }
         return false;
@@ -1473,19 +1481,7 @@ public class RaftNode {
         this.electionLeader = electionLeader;
     }
 
-    public List<Integer> getQualificationTable() {
+    public Set<Integer> getQualificationTable() {
         return qualificationTable;
-    }
-
-    public void setQualificationTable(List<Integer> qualificationTable) {
-        this.qualificationTable = qualificationTable;
-    }
-
-    public List<Integer> getPriorityTable() {
-        return priorityTable;
-    }
-
-    public void setPriorityTable(List<Integer> priorityTable) {
-        this.priorityTable = priorityTable;
     }
 }

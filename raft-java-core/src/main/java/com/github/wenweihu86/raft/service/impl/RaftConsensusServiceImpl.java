@@ -10,13 +10,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.rmi.runtime.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -69,13 +67,12 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
     public RaftProto.PrepareElectionResponse prepareElection(RaftProto.PrepareElectionRequest request) {
         raftNode.getLock().lock();
         try {
-            raftNode.resetElectionTimer();
-            if (!raftNode.isElectionLeader()) {
-                raftNode.setElectionLeader(true);
-                raftNode.startPrepareElection();
-            }
             RaftProto.PrepareElectionResponse.Builder responseBuilder = RaftProto.PrepareElectionResponse.newBuilder();   // 构建 VoteResponse
-            responseBuilder.setGranted(true);  // 默认是 false
+            if (!raftNode.isElectionLeader()) { // 如果自己未进入 Leader 选举阶段
+                responseBuilder.setGranted(true);  // 同意请求
+                return responseBuilder.build(); // 返回响应的结果
+            }
+            responseBuilder.setGranted(false);  // 自己已经进入 Leader 竞选阶段了，否定请求
             return responseBuilder.build(); // 返回响应的结果
         } finally {
             raftNode.getLock().unlock();
@@ -86,6 +83,15 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
     public RaftProto.QualificationConfirmResponse qualificationConfirm(RaftProto.QualificationConfirmRequest request) {
         raftNode.getLock().lock();
         try {
+            if (!raftNode.isElectionLeader()) { // 如果自己不是在竞选 Leader 状态
+                raftNode.resetElectionTimer();  // 重置自己的定时器
+                raftNode.getExecutorService().submit(new Runnable() {   // 异步让自己进入资格确认阶段
+                    @Override
+                    public void run() {
+                        raftNode.startQualificationConfirm();   // 让自己进入资格确认阶段
+                    }
+                });
+            }
             RaftProto.QualificationConfirmResponse.Builder responseBuilder = RaftProto.QualificationConfirmResponse.newBuilder();   // 构建 VoteResponse
             responseBuilder.setGranted(false);  // 默认是 false
             responseBuilder.setTerm(raftNode.getCurrentTerm()); // 自己的任期号

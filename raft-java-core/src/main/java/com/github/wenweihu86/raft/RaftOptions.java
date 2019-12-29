@@ -49,9 +49,9 @@ public class RaftOptions {
     private boolean priorityElection = false;
 
     // 资格确认超时时间
-    private int qualificationConfirmTimeout = 200;
+    private int qualificationConfirmTimeout = 300;
 
     // 资格写入超时时间
-    private long qualificationWriteTimeout = 200;
+    private long qualificationWriteTimeout = 300;
 
 }
