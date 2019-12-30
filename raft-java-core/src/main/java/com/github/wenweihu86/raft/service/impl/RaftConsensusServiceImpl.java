@@ -144,7 +144,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
         RaftProto.PriorityVoteResponse.Builder responseBuilder = RaftProto.PriorityVoteResponse.newBuilder();
         responseBuilder.setGranted(false);
         int serverId = request.getServerId();   // 获取请求投票节点的 id 号
-        LOG.info("priority vote request from server {}, the qualification table is [ {} ]",
+        LOG.info("priority vote request from server {}, the qualification table is {}",
                 serverId,
                 raftNode.getQualificationTable());
         if (raftNode.isHighestPriority(serverId)) {    // 如果资格表中有当前节点信息
