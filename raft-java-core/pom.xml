@@ -2,13 +2,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.wenweihu86.raft</groupId>
+    <groupId>top.aprilyolies.raft.core</groupId>
     <artifactId>raft-java-core</artifactId>
     <version>1.9.0</version>
     <packaging>jar</packaging>
 
     <name>raft-java-core</name>
-    <url>http://maven.apache.org</url>
     <description>another Raft implementation for Java</description>
 
     <properties>
@@ -29,12 +28,12 @@
         </developer>
     </developers>
 
-<!--    <scm>-->
-<!--        <connection>scm:git:https://github.com/wenweihu86/rpc-java</connection>-->
-<!--        <developerConnection>scm:git:git@github.com:wenweihu86/rpc-java.git</developerConnection>-->
-<!--        <url>https://github.com/wenweihu86/rpc-java</url>-->
-<!--        <tag>1.0.0</tag>-->
-<!--    </scm>-->
+    <!--    <scm>-->
+    <!--        <connection>scm:git:https://github.com/wenweihu86/rpc-java</connection>-->
+    <!--        <developerConnection>scm:git:git@github.com:wenweihu86/rpc-java.git</developerConnection>-->
+    <!--        <url>https://github.com/wenweihu86/rpc-java</url>-->
+    <!--        <tag>1.0.0</tag>-->
+    <!--    </scm>-->
 
     <profiles>
         <profile>

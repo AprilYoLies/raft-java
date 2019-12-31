@@ -8,7 +8,7 @@
     <Appenders>
 
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d %p [%t]\t%m%n" />
+            <PatternLayout pattern="%d %p [%t]\t%m%n"/>
         </Console>
 
         <!-- Async Loggers will auto-flush in batches, so switch off immediateFlush. -->
@@ -26,13 +26,13 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="com.github.wenweihu86.raft" level="info" additivity="false">
-            <AppenderRef ref="Console" />
+        <Logger name="top.aprilyolies.raft" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
         </Logger>
 
         <Root level="info" includeLocation="false">
-            <AppenderRef ref="Console" />
+            <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
         </Root>
     </Loggers>

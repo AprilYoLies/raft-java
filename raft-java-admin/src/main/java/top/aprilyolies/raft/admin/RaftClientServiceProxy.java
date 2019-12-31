@@ -1,14 +1,14 @@
-package com.github.wenweihu86.raft.admin;
+package top.aprilyolies.raft.admin;
 
 import com.baidu.brpc.client.BrpcProxy;
 import com.baidu.brpc.client.RpcClient;
 import com.baidu.brpc.client.RpcClientOptions;
 import com.baidu.brpc.client.instance.Endpoint;
-import com.github.wenweihu86.raft.proto.RaftProto;
-import com.github.wenweihu86.raft.service.RaftClientService;
 import com.googlecode.protobuf.format.JsonFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import top.aprilyolies.raft.core.proto.RaftProto;
+import top.aprilyolies.raft.core.service.RaftClientService;
 
 import java.util.List;
 
@@ -78,6 +78,7 @@ public class RaftClientServiceProxy implements RaftClientService {
             clusterRPCClient.stop();
         }
     }
+
     // 通过 clusterRaftClientService 获取到 Leader 信息，然后通过 Leader 的信息构建 leaderRaftClientService
     private boolean updateConfiguration() {
         RaftProto.GetConfigurationRequest request = RaftProto.GetConfigurationRequest.newBuilder().build(); // 构建 GetConfigurationRequest

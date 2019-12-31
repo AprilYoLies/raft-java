@@ -47,5 +47,5 @@ fi
 JAVA_OPTS=" $JAVA_BASE_OPTS $JAVA_MEM_OPTS $JAVA_JMX_OPTS $JAVA_GC_OPTS $JAVA_CP"
 
 RUNJAVA="$JAVA_HOME/bin/java"
-MAIN_CLASS=com.github.wenweihu86.raft.example.client.ConcurrentClientMain
+MAIN_CLASS=ConcurrentClientMain
 $RUNJAVA $JAVA_CP $MAIN_CLASS $THREAD_NUM
