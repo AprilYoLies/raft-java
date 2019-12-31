@@ -19,6 +19,7 @@ public class Peer {
     private long matchIndex;
     private volatile Boolean voteGranted;
     private volatile boolean isCatchUp;
+
     // 保存了 Server 实例，构建了 RpcClient
     public Peer(RaftProto.Server server) {
         this.server = server;   // 两个字段 server_id、endpoints
@@ -29,6 +30,13 @@ public class Peer {
         isCatchUp = false;
     }
 
+    // 创建新的 RpcClient
+    public RpcClient createClient() {
+        return new RpcClient(new Endpoint(    // rpc 客户端
+                server.getEndpoint().getHost(),
+                server.getEndpoint().getPort()));   // 通过 RpcClient 构建 RaftConsensusServiceAsync 的代理类
+    }
+
     public RaftProto.Server getServer() {
         return server;
     }
@@ -36,6 +44,7 @@ public class Peer {
     public RpcClient getRpcClient() {
         return rpcClient;
     }
+
     // 获取用于 rpc 通信的 RaftConsensusServiceAsync 代理类
     public RaftConsensusServiceAsync getRaftConsensusServiceAsync() {
         return raftConsensusServiceAsync;

@@ -30,19 +30,21 @@ public class ClientMain {
         final JsonFormat jsonFormat = new JsonFormat();
 
         // set
-        if (value != null) {
-            ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()   // 构建对应的GET请求消息
-                    .setKey(key).setValue(value).build();
-            ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
-            System.out.printf("set request, key=%s value=%s response=%s\n",
-                    key, value, jsonFormat.printToString(setResponse));
-        } else {
-            // get
-            ExampleProto.GetRequest getRequest = ExampleProto.GetRequest.newBuilder()   // 构建对应的PUT请求消息
-                    .setKey(key).build();
-            ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
-            System.out.printf("get request, key=%s, response=%s\n",
-                    key, jsonFormat.printToString(getResponse));
+        for (int i = 0; i < 1; i++) {
+            if (value != null) {
+                ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()   // 构建对应的GET请求消息
+                        .setKey(key).setValue(value).build();
+                ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
+                System.out.printf("set request, key=%s value=%s response=%s\n",
+                        key, value, jsonFormat.printToString(setResponse));
+            } else {
+                // get
+                ExampleProto.GetRequest getRequest = ExampleProto.GetRequest.newBuilder()   // 构建对应的PUT请求消息
+                        .setKey(key).build();
+                ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
+                System.out.printf("get request, key=%s, response=%s\n",
+                        key, jsonFormat.printToString(getResponse));
+            }
         }
 
         rpcClient.stop();
