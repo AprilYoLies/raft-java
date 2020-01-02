@@ -7,6 +7,7 @@ import top.aprilyolies.raft.example.server.service.ExampleService;
 import com.googlecode.protobuf.format.JsonFormat;
 
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -16,8 +17,9 @@ import java.util.concurrent.Future;
  */
 public class ConcurrentClientMain {
     private static JsonFormat jsonFormat = new JsonFormat();
+    private static CountDownLatch latch;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         if (args.length != 1) {
             System.out.printf("Usage: ./run_concurrent_client.sh THREAD_NUM\n");
             System.exit(-1);
@@ -28,26 +30,37 @@ public class ConcurrentClientMain {
         RpcClient rpcClient = new RpcClient(ipPorts);
         ExampleService exampleService = BrpcProxy.getProxy(rpcClient, ExampleService.class);
 
-        ExecutorService readThreadPool = Executors.newFixedThreadPool(3);
-        ExecutorService writeThreadPool = Executors.newFixedThreadPool(3);
-        Future<?>[] future = new Future[3];
-        for (int i = 0; i < 3; i++) {
-            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool));
+        int clientNums = 10;
+        int optNum = 1000;
+        latch = new CountDownLatch(clientNums);
+        ExecutorService readThreadPool = Executors.newFixedThreadPool(clientNums);
+        ExecutorService writeThreadPool = Executors.newFixedThreadPool(clientNums);
+        Future<?>[] future = new Future[clientNums];
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < clientNums; i++) {
+            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, optNum / clientNums));
         }
+        latch.await();
+        System.out.println("Write " + optNum + " records with " + clientNums + " clients cost " +
+                (System.currentTimeMillis() - start) + "ms");
+        readThreadPool.shutdown();
+        writeThreadPool.shutdown();
     }
 
     public static class SetTask implements Runnable {
+        private final int optNum;
         private ExampleService exampleService;
         ExecutorService readThreadPool;
 
-        public SetTask(ExampleService exampleService, ExecutorService readThreadPool) {
+        public SetTask(ExampleService exampleService, ExecutorService readThreadPool, int optNum) {
             this.exampleService = exampleService;
             this.readThreadPool = readThreadPool;
+            this.optNum = optNum;
         }
 
         @Override
         public void run() {
-            while (true) {
+            for (int i = 0; i < optNum; i++) {
                 String key = UUID.randomUUID().toString();
                 String value = UUID.randomUUID().toString();
                 ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()
@@ -67,6 +80,7 @@ public class ConcurrentClientMain {
                     ex.printStackTrace();
                 }
             }
+            latch.countDown();
         }
     }
 
