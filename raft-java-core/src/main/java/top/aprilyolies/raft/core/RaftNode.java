@@ -227,7 +227,7 @@ public class RaftNode {
 
         LOG.debug("is need snapshot={}, peer={}", isNeedInstallSnapshot, peer.getServer().getServerId());
         if (isNeedInstallSnapshot) {
-            if (!installSnapshot(peer)) {   // 如果需要安装快照，进行快照的安装操作
+            if (!installSnapshot(peer)) {   // 如果需要安装快照，进行快照的安装操作，安装完成后需要更新 peer 的 nextIndex
                 return;
             }
         }
@@ -1234,7 +1234,7 @@ public class RaftNode {
         return lastIndex - nextIndex + 1;   // 返回批量操作的日志项数
     }
 
-    // 向其它节点安装快照
+    // 向其它节点安装快照，这里就是 peer，安装完成后，需要更新 peer 的 nextIndex
     private boolean installSnapshot(Peer peer) {
         if (snapshot.getIsTakeSnapshot().get()) {   // 如果当前正在拍快照，那么就不能进行安装快照的操作
             LOG.info("already in take snapshot, please send install snapshot request later");
