@@ -24,7 +24,8 @@ public class RaftOptions {
     private int snapshotMinLogSize = 100 * 1024 * 1024;
     private int maxSnapshotBytesPerRequest = 500 * 1024; // 500k
 
-    private int maxLogEntriesPerRequest = 5000;
+    // 每次 batch 操作的最大数量 maxLogEntriesPerRequest >= 2
+    private int maxLogEntriesPerRequest = 2;
 
     // 单个segment文件大小，默认100m
     private int maxSegmentFileSize = 100 * 1000 * 1000;

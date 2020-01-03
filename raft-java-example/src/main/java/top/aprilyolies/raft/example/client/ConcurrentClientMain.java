@@ -68,17 +68,17 @@ public class ConcurrentClientMain {
 
                 long startTime = System.currentTimeMillis();
                 ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
-                try {
-                    if (setResponse != null) {
-                        System.out.printf("set request, key=%s, value=%s, response=%s, elapseMS=%d\n",
-                                key, value, jsonFormat.printToString(setResponse), System.currentTimeMillis() - startTime);
-                        readThreadPool.submit(new GetTask(exampleService, key));
-                    } else {
-                        System.out.printf("set request failed, key=%s value=%s\n", key, value);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+//                try {
+//                    if (setResponse != null) {
+//                        System.out.printf("set request, key=%s, value=%s, response=%s, elapseMS=%d\n",
+//                                key, value, jsonFormat.printToString(setResponse), System.currentTimeMillis() - startTime);
+//                        readThreadPool.submit(new GetTask(exampleService, key));
+//                    } else {
+//                        System.out.printf("set request failed, key=%s value=%s\n", key, value);
+//                    }
+//                } catch (Exception ex) {
+//                    ex.printStackTrace();
+//                }
             }
             latch.countDown();
         }
