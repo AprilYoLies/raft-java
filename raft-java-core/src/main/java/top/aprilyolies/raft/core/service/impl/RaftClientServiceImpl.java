@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import top.aprilyolies.raft.core.Peer;
 import top.aprilyolies.raft.core.RaftNode;
+import top.aprilyolies.raft.core.RaftOptions;
 import top.aprilyolies.raft.core.proto.RaftProto;
 import top.aprilyolies.raft.core.service.RaftClientService;
 import top.aprilyolies.raft.core.util.ConfigurationUtils;
@@ -21,7 +22,7 @@ public class RaftClientServiceImpl implements RaftClientService {
 
     private RaftNode raftNode;
 
-    public RaftClientServiceImpl(RaftNode raftNode) {
+    public RaftClientServiceImpl(RaftNode raftNode, RaftOptions raftOptions) {
         this.raftNode = raftNode;
     }
 
@@ -105,7 +106,7 @@ public class RaftClientServiceImpl implements RaftClientService {
             raftNode.getExecutorService().submit(new Runnable() {
                 @Override
                 public void run() {
-                    raftNode.appendEntries(peer);   // 向新加入的 peer 追加日志项
+                    raftNode.appendEntries(peer, false);   // 向新加入的 peer 追加日志项
                 }
             });
         }

@@ -25,7 +25,7 @@ public class RaftOptions {
     private int maxSnapshotBytesPerRequest = 500 * 1024; // 500k
 
     // 每次 batch 操作的最大数量 maxLogEntriesPerRequest >= 2
-    private int maxLogEntriesPerRequest = 2;
+    private int maxLogEntriesPerRequest = 1000;
 
     // 单个segment文件大小，默认100m
     private int maxSegmentFileSize = 100 * 1000 * 1000;
@@ -44,7 +44,7 @@ public class RaftOptions {
     private boolean asyncWrite = false;
 
     // raft的log和snapshot父目录，绝对路径
-    private String dataDir = System.getProperty("com.github.wenweihu86.raft.data.dir");
+    private String dataDir = System.getProperty("top.aprilyolies.raft.data.dir");
 
     // 基于节点优先级的 Leader 选举方案
     private boolean priorityElection = false;
@@ -55,4 +55,9 @@ public class RaftOptions {
     // 资格写入超时时间
     private long qualificationWriteTimeout = 300;
 
+    // 并发写入标识
+    private boolean concurrentWrite = false;
+
+    // 并发写入窗口大小
+    private int concurrentWindow = 100;
 }

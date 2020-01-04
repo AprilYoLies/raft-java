@@ -30,7 +30,7 @@ public class ClientMain {
         final JsonFormat jsonFormat = new JsonFormat();
 
         // set
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 20; i++) {
             if (value != null) {
                 ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()   // 构建对应的GET请求消息
                         .setKey(key).setValue(value).build();

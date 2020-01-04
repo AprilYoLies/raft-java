@@ -164,13 +164,15 @@ public class RaftNode {
                 LOG.debug("I'm not the leader");
                 return false;
             }
-            RaftProto.LogEntry logEntry = RaftProto.LogEntry.newBuilder()   // 构建日志项任务
+            final RaftProto.LogEntry logEntry = RaftProto.LogEntry.newBuilder()   // 构建日志项任务
                     .setTerm(currentTerm)   // 设置任期
                     .setType(entryType) // 设置消息类型
                     .setData(ByteString.copyFrom(data)).build();    // 将数据填充到 LogEntry 中
             List<RaftProto.LogEntry> entries = new ArrayList<>();
             entries.add(logEntry);  // list 装 LogEntry
             newLastLogIndex = raftLog.append(entries);  // 判断是否需要新的日志段文件，然后将日志项写入到日志段文件中，更新对应的记录信息，返回写入后新的 LastLogIndex
+            final RaftProto.LogEntry logEntry1 = RaftProto.LogEntry.newBuilder()
+                    .mergeFrom(logEntry).setIndex(newLastLogIndex).build();
             // 创建元数据文件，将元数据信息写入元数据文件中 currentTerm=18, votedFor=2, firstLogIndex=1
             raftLog.updateMetaData(currentTerm, null, raftLog.getFirstLogIndex());
             for (RaftProto.Server server : configuration.getServersList()) {
@@ -178,7 +180,11 @@ public class RaftNode {
                 executorService.submit(new Runnable() { // 向其它节点提交追加日志项的任务
                     @Override
                     public void run() {
-                        appendEntries(peer);
+                        if (!raftOptions.isConcurrentWrite())
+                            appendEntries(peer, false);
+                        else {
+                            appendEntriesConcurrent(peer, logEntry1);
+                        }
                     }
                 });
             }
@@ -208,12 +214,98 @@ public class RaftNode {
         return true;
     }
 
-    // 追加日志，先判断是否需要安装快照，然后将必要的信息封装为 AppendEntriesRequest，发送对应的 rpc 请求，如果成功，更新 commitIndex 然后执行对应的日志项
-    public void appendEntries(Peer peer) {
+    private void appendEntriesConcurrent(Peer peer, RaftProto.LogEntry logEntry) {
         RaftProto.AppendEntriesRequest.Builder requestBuilder = RaftProto.AppendEntriesRequest.newBuilder();    // 构建一个追加日志的消息 Builder
         long prevLogIndex;
-        long numEntries;
 
+        if (!installSnapshotIfNeed(peer)) return;
+
+        long lastSnapshotIndex;
+        long lastSnapshotTerm;
+        snapshot.getLock().lock();  // 获取快照读取的锁
+        try {
+            lastSnapshotIndex = snapshot.getMetaData().getLastIncludedIndex();  // 快照元信息中最后一个日志项的索引
+            lastSnapshotTerm = snapshot.getMetaData().getLastIncludedTerm();    // 快照元信息中最后一个日志项的任期
+        } finally {
+            snapshot.getLock().unlock();
+        }
+
+        lock.lock();
+        try {
+            long firstLogIndex = raftLog.getFirstLogIndex();    // 第一条日志项
+            Validate.isTrue(peer.getNextIndex() >= firstLogIndex);  // 这时一定要求 Peer 的下一个位置是在本机日志项之后的
+            prevLogIndex = logEntry.getIndex() - 1; // 目标日志项的上一条日志项
+            long prevLogTerm;
+            if (prevLogIndex == 0) {    // 如果之前没有日志项，假定之前的任期为 0
+                prevLogTerm = 0;
+            } else if (prevLogIndex == lastSnapshotIndex) { // 这里是以最后一个快照的最后一个日志项作为上一个日志项的索引值和任期
+                prevLogTerm = lastSnapshotTerm;
+            } else {
+                prevLogTerm = raftLog.getEntryTerm(prevLogIndex);   // 直接获取索引位置对应的日志项
+            }
+            requestBuilder.setServerId(localServer.getServerId());  // 本机 id
+            requestBuilder.setTerm(currentTerm);    // 当前任期
+            requestBuilder.setPrevLogTerm(prevLogTerm); // 上一个日志项任期
+            requestBuilder.setPrevLogIndex(prevLogIndex);   // 上一个日志项的索引
+            requestBuilder.addEntries(logEntry);
+            requestBuilder.setCommitIndex(Math.min(commitIndex, prevLogIndex + 1));    // commitIndex 不能超过自身的 commitIndex
+        } finally {
+            lock.unlock();
+        }
+
+        RaftProto.AppendEntriesRequest request = requestBuilder.build();    // 构建真正的 AppendEntriesRequest
+        RaftProto.AppendEntriesResponse response = peer.getRaftConsensusServiceAsync().appendEntriesConcurrent(request);  // 发送追加日志项的请求
+
+        lock.lock();
+        try {
+            if (response == null) { // 如果响应为 null，那么可以确定向 peer 追加日志时失败了
+                LOG.warn("appendEntries with peer[{}:{}] failed",
+                        peer.getServer().getEndpoint().getHost(),
+                        peer.getServer().getEndpoint().getPort());  // 如果配置列表中此时不包含该 peer 了，需要将该 peer 移除并关闭其持有的 rpc 客户端
+                if (!ConfigurationUtils.containsServer(configuration, peer.getServer().getServerId())) {
+                    peerMap.remove(peer.getServer().getServerId());
+                    peer.getRpcClient().stop();
+                }
+                return;
+            }
+            LOG.info("AppendEntries response[{}] from server {} " + // 日志追加成功
+                            "in term {} (my term is {})",
+                    response.getResCode(), peer.getServer().getServerId(),
+                    response.getTerm(), currentTerm);
+
+            if (response.getTerm() > currentTerm) { // 如果被追加日志项的节点的任期比自己的高，需要降级
+                stepDown(response.getTerm());
+            } else {
+                if (response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {  // 如果响应结果代码为成功
+                    long lastLogIndex = response.getLastLogIndex();
+                    peer.setMatchIndex(lastLogIndex);  // 更新 peer 的 matchIndex
+                    peer.setNextIndex(peer.getMatchIndex() + 1);    // 更新 peer 的 nextIndex
+                    if (ConfigurationUtils.containsServer(configuration, peer.getServer().getServerId())) {
+                        advanceCommitIndex();   // 根据各个节点的 matchIndex 来计算得到 commitIndex（超过半数的匹配即可提交），本机执行日志项到 commitIndex，更新 applyIndex
+                    } else {
+                        if (raftLog.getLastLogIndex() - peer.getMatchIndex() <= raftOptions.getCatchupMargin()) {   // 这里是判断 peer 的日志项是否追赶上 Leader 节点
+                            LOG.debug("peer catch up the leader");
+                            peer.setCatchUp(true);  // 标记 peer 已经追赶上 Leader 节点
+                            // signal the caller thread
+                            catchUpCondition.signalAll();   // 通知日志追赶的任务
+                        }
+                    }
+                } else {
+                    peer.setNextIndex(response.getLastLogIndex() + 1);
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * 检查 peer 是否需要安装快照，如果需要则进行安装
+     *
+     * @param peer 被检查的节点
+     * @return 如果快照安装失败，返回 false，不需要安装快照或者快照安装成功，返回 false
+     */
+    private boolean installSnapshotIfNeed(Peer peer) {
         boolean isNeedInstallSnapshot = false;
         lock.lock();
         try {
@@ -228,9 +320,19 @@ public class RaftNode {
         LOG.debug("is need snapshot={}, peer={}", isNeedInstallSnapshot, peer.getServer().getServerId());
         if (isNeedInstallSnapshot) {
             if (!installSnapshot(peer)) {   // 如果需要安装快照，进行快照的安装操作，安装完成后需要更新 peer 的 nextIndex
-                return;
+                return false;
             }
         }
+        return true;
+    }
+
+    // 追加日志，先判断是否需要安装快照，然后将必要的信息封装为 AppendEntriesRequest，发送对应的 rpc 请求，如果成功，更新 commitIndex 然后执行对应的日志项
+    public void appendEntries(Peer peer, boolean isHeartbeat) {
+        RaftProto.AppendEntriesRequest.Builder requestBuilder = RaftProto.AppendEntriesRequest.newBuilder();    // 构建一个追加日志的消息 Builder
+        long prevLogIndex;
+        long numEntries = 0;
+
+        if (!installSnapshotIfNeed(peer)) return;
 
         long lastSnapshotIndex;
         long lastSnapshotTerm;
@@ -259,7 +361,8 @@ public class RaftNode {
             requestBuilder.setTerm(currentTerm);    // 当前任期
             requestBuilder.setPrevLogTerm(prevLogTerm); // 上一个日志项任期
             requestBuilder.setPrevLogIndex(prevLogIndex);   // 上一个日志项的索引
-            numEntries = packEntries(peer.getNextIndex(), requestBuilder);  // 将多条日志项打包到 AppendEntriesRequest 中，返回打包的数量
+            if (!isHeartbeat)   // 如果不是心跳消息
+                numEntries = packEntries(peer.getNextIndex(), requestBuilder);  // 将多条日志项打包到 AppendEntriesRequest 中，返回打包的数量
             requestBuilder.setCommitIndex(Math.min(commitIndex, prevLogIndex + numEntries));    // commitIndex 不能超过自身的 commitIndex
         } finally {
             lock.unlock();
@@ -312,22 +415,29 @@ public class RaftNode {
 
     // in lock 判断参数是否合理，然后重置一些状态信息，更新自己的身份为 Follower，终止心跳任务，重置选举定时器
     public void stepDown(long newTerm) {
-        if (currentTerm > newTerm) {    // 参数检查，如果自己的任期比较高，那么就不能执行 stepDown
-            LOG.error("can't be happened");
-            return;
+        try {
+            lock.lock();
+            if (currentTerm > newTerm) {    // 参数检查，如果自己的任期比较高，那么就不能执行 stepDown
+                LOG.error("can't be happened");
+                return;
+            }
+            if (currentTerm < newTerm) {    // 如果当前任期比它人的低
+                currentTerm = newTerm;  // 更新自己的任期为跟它人一样
+                leaderId = 0;   // 重置 Leader
+                votedFor = 0;   // 重置投票结果
+                raftLog.updateMetaData(currentTerm, votedFor, null);    // 更新元数据信息
+            }
+            state = NodeState.STATE_FOLLOWER;   // 更新当前状态为 Follower
+            // stop heartbeat
+            if (heartbeatScheduledFuture != null && !heartbeatScheduledFuture.isDone()) {
+                heartbeatScheduledFuture.cancel(true);  // 终止定时的心跳任务
+            }
+            resetElectionTimer();   // 重置选举定时器
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
         }
-        if (currentTerm < newTerm) {    // 如果当前任期比它人的低
-            currentTerm = newTerm;  // 更新自己的任期为跟它人一样
-            leaderId = 0;   // 重置 Leader
-            votedFor = 0;   // 重置投票结果
-            raftLog.updateMetaData(currentTerm, votedFor, null);    // 更新元数据信息
-        }
-        state = NodeState.STATE_FOLLOWER;   // 更新当前状态为 Follower
-        // stop heartbeat
-        if (heartbeatScheduledFuture != null && !heartbeatScheduledFuture.isDone()) {
-            heartbeatScheduledFuture.cancel(true);  // 终止定时的心跳任务
-        }
-        resetElectionTimer();   // 重置选举定时器
     }
 
     // 拍快照，检查当前是否满足拍快照的条件，拍快照，然后将结果替换原快照的内容，然后重新载入快照元信息，并删除过期的日志项
@@ -1175,7 +1285,7 @@ public class RaftNode {
             executorService.submit(new Runnable() {
                 @Override
                 public void run() {
-                    appendEntries(peer);
+                    appendEntries(peer, true);
                 }
             });
         }

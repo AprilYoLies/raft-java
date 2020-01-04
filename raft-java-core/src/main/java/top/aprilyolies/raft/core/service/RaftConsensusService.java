@@ -29,6 +29,9 @@ public interface RaftConsensusService {
     // 追加日志项
     RaftProto.AppendEntriesResponse appendEntries(RaftProto.AppendEntriesRequest request);
 
+    // 并发追加日志项
+    RaftProto.AppendEntriesResponse appendEntriesConcurrent(RaftProto.AppendEntriesRequest request);
+
     // 安装快照
     RaftProto.InstallSnapshotResponse installSnapshot(RaftProto.InstallSnapshotRequest request);
 }
