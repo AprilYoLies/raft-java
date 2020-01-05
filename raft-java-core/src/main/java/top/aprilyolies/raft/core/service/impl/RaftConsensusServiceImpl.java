@@ -459,9 +459,14 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
 
         responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS); // 执行到这里，说明不是心跳消息
         List<RaftProto.LogEntry> entries = buffer.getLogEntriesWithoutGap();
-        raftNode.getRaftLog().append(entries);  // 将收到的日志项追加到本地中
-        raftNode.getRaftLog().updateMetaData(raftNode.getCurrentTerm(), // 更新元数据信息
-                null, raftNode.getRaftLog().getFirstLogIndex());
+        try {
+            raftNode.getLock().lock();
+            raftNode.getRaftLog().append(entries);  // 将收到的日志项追加到本地中
+            raftNode.getRaftLog().updateMetaData(raftNode.getCurrentTerm(), // 更新元数据信息
+                    null, raftNode.getRaftLog().getFirstLogIndex());
+        } finally {
+            raftNode.getLock().unlock();
+        }
         responseBuilder.setLastLogIndex(buffer.getLastLogIndexWithoutGap());   // 响应中告诉 Leader 自己接下来需要的日志项的位置
 
         advanceCommitIndex(request);    // 确定新的 commitIndex，然后让状态机应用日志项直到新的 commitIndex
