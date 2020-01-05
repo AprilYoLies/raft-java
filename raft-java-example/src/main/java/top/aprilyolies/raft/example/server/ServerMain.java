@@ -48,6 +48,7 @@ public class ServerMain {
         raftOptions.setMaxSegmentFileSize(1024 * 1024); // 最大日志段文件长度 1 MB
         raftOptions.setPriorityElection(true);  // 基于节点优先级的 Leader 选举方案
         raftOptions.setConcurrentWrite(true);   // 并发写入方案
+        raftOptions.setConcurrentWindow(200);
         // 应用状态机
         ExampleStateMachine stateMachine = new ExampleStateMachine(raftOptions.getDataDir());   // 创建 ExampleStateMachine，保存了路径
         // 初始化RaftNode，保存了 raftOptions，构建了 RaftProto.Configuration，创建 snapshot 并尝试从本地加载快照元数据，创建 raftLog 并加载了本地元数据，比较快照范围，执行后续的日志项，更新 applyIndex
@@ -59,7 +60,7 @@ public class ServerMain {
         RaftClientService raftClientService = new RaftClientServiceImpl(raftNode, raftOptions);  // 将 RaftNode 保存到 RaftClientServiceImpl 实例中
         server.registerService(raftClientService);  // 将当前的服务注册到 RpcServer
         // 注册应用自己提供的服务
-        ExampleService exampleService = new ExampleServiceImpl(raftNode, stateMachine); // 将 RaftNode,ExampleStateMachine 保存到 ExampleServiceImpl 实例中
+        ExampleService exampleService = new ExampleServiceImpl(raftNode, stateMachine, raftOptions); // 将 RaftNode,ExampleStateMachine 保存到 ExampleServiceImpl 实例中
         server.registerService(exampleService); // 将当前的服务注册到 RpcServer
         // 启动RPCServer，初始化Raft节点
         server.start(); // 仅仅是启动 RpcServer
