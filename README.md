@@ -4,11 +4,13 @@ Raft implementation library for Java.<br>
 
 # 支持的功能
 * leader选举
+* 基于节点优先级的 Leader 选举
+* 并发写入
 * 日志复制
 * snapshot
 * 集群成员动态更变
 
-## Quick Start
+## 脚本启动
 在本地单机上部署一套3实例的raft集群，执行如下脚本：<br>
 cd raft-java-example && sh deploy.sh <br>
 该脚本会在raft-java-example/env目录部署三个实例example1、example2、example3；<br>
@@ -18,6 +20,37 @@ cd env/client <br>
 ./bin/run_client.sh "list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053" hello world <br>
 测试读操作命令：<br>
 ./bin/run_client.sh "list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053" hello
+
+## IDE 启动
+1. 启动三个节点
+> top.aprilyolies.raft.example.server.ServerMain
+```bash
+启动参数
+./data1 127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3 127.0.0.1:8051:1
+./data2 127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3 127.0.0.1:8052:2
+./data3 127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3 127.0.0.1:8053:3
+```
+
+2. 单线程客户端写入数据
+> top.aprilyolies.raft.example.client.ClientMain
+```bash
+启动参数
+list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053 hello world
+```
+
+3. 单线程客户端读取数据
+> top.aprilyolies.raft.example.client.ClientMain
+```bash
+启动参数
+list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053 hello
+```
+
+4. 多线程客户端读写数据
+> top.aprilyolies.raft.example.client.ConcurrentClientMain
+```bash
+启动参数
+list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053
+```
 
 # 使用方法
 下面介绍如何在代码中使用raft-java依赖库来实现一套分布式存储系统。
