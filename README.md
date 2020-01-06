@@ -1,7 +1,7 @@
 # raft-java
 Raft implementation library for Java.<br>
 参考自[Raft论文](https://github.com/maemual/raft-zh_cn)和Raft作者的开源实现[LogCabin](https://github.com/logcabin/logcabin)。<br>
-项目原[地址](https://github.com/wenweihu86/raft-java)。
+项目Fork自[wenweihu86/raft-java](https://github.com/wenweihu86/raft-java)，修正了原项目`com.baidu.brpc.exceptions.RpcException: serviceInterface must not be set repeatedly, please use another RpcClient`异常问题，根据自己的理解增加了基于节点优先级的 Leader 选举方案和并发写入方案。
 
 # 支持的功能
 * leader选举
