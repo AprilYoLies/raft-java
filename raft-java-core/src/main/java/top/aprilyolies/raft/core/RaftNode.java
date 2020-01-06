@@ -839,6 +839,7 @@ public class RaftNode {
         @Override   // 准备选举响应成功的回调函数
         public void success(RaftProto.PrepareElectionResponse response) {
             lock.lock();
+            boolean prepareElectionOk = false;
             try {
                 peer.setVoteGranted(response.getGranted()); // 将其它节点的投票结果进行标记
                 if (response.getGranted()) {    // 如果这个节点投的是赞成票
@@ -855,9 +856,10 @@ public class RaftNode {
                         }
                     }
                     LOG.info("prepareElectionGrantedNum={}", prepareElectionGrantedNum);   // 输出得票数
-                    if (prepareElectionGrantedNum > configuration.getServersCount() / 2) { // 如果得票数超过半数
+                    if (prepareElectionGrantedNum == configuration.getServersCount() / 2 + 1) { // 如果得票数达到门限（保证只会发起一次资格确认请求）
                         LOG.info("get majority grants, serverId={} when prepare election, start election",
                                 localServer.getServerId());
+                        prepareElectionOk = true;
                     }
                 } else {
                     LOG.info("prepare election denied by server {}, my term is {}",
@@ -866,12 +868,13 @@ public class RaftNode {
             } finally {
                 lock.unlock();
             }
-            startQualificationConfirm();    // 资格确认阶段
+            if (prepareElectionOk)
+                startQualificationConfirm();    // 资格确认阶段
         }
 
         @Override
         public void fail(Throwable e) {
-
+            LOG.info("prepare election rpc request failed");
         }
     }
 
@@ -922,7 +925,7 @@ public class RaftNode {
 
         @Override
         public void fail(Throwable e) {
-
+            LOG.info("qualification confirm rpc request failed");
         }
     }
 
@@ -973,7 +976,7 @@ public class RaftNode {
 
         @Override
         public void fail(Throwable e) {
-
+            LOG.info("qualification write rpc request failed");
         }
     }
 
@@ -1026,7 +1029,7 @@ public class RaftNode {
 
         @Override
         public void fail(Throwable e) {
-
+            LOG.info("priority vote rpc request failed");
         }
     }
 
