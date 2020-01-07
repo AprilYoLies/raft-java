@@ -30,19 +30,26 @@ public class ConcurrentClientMain {
         RpcClient rpcClient = new RpcClient(ipPorts);
         ExampleService exampleService = BrpcProxy.getProxy(rpcClient, ExampleService.class);
 
-        int clientNums = 1;
-        int optNum = 1000;
-        latch = new CountDownLatch(clientNums);
+        int totalTime = 0;  // 统计总耗时
+        int times = 30;    // 统计次数
+        int clientNums = 2; // 客户端数量
+        int optNum = 1000;  // 写入记录数
+
         ExecutorService readThreadPool = Executors.newFixedThreadPool(clientNums);
         ExecutorService writeThreadPool = Executors.newFixedThreadPool(clientNums);
-        Future<?>[] future = new Future[clientNums];
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < clientNums; i++) {
-            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, optNum / clientNums));
+        for (int i = 0; i < times; i++) {
+            latch = new CountDownLatch(clientNums);
+            Future<?>[] future = new Future[clientNums];
+            long start = System.currentTimeMillis();
+            for (int j = 0; j < clientNums; j++) {
+                future[j] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, optNum / clientNums));
+            }
+            latch.await();
+            long cost = System.currentTimeMillis() - start;
+            totalTime += cost;
+            System.out.println("Write " + optNum + " records with " + clientNums + " clients cost " + cost + "ms");
         }
-        latch.await();
-        System.out.println("Write " + optNum + " records with " + clientNums + " clients cost " +
-                (System.currentTimeMillis() - start) + "ms");
+        System.out.println("Write " + optNum + " records with " + clientNums + " clients average cost " + totalTime / times + "ms");
         readThreadPool.shutdown();
         writeThreadPool.shutdown();
     }

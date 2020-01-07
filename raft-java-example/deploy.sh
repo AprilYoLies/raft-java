@@ -4,36 +4,36 @@ mvn clean package
 
 EXAMPLE_TAR=raft-java-example-1.9.0-deploy.tar.gz
 ROOT_DIR=./env
+NODE_DIR_PREFIX="node"
+HOST="127.0.0.1"
+HOST_LIST=""
+PORT=8050
+NODE_NUM=3
+
 mkdir -p $ROOT_DIR
-cd $ROOT_DIR
+cd $ROOT_DIR || exit
+rm -fr ./*
 
-mkdir example1
-cd example1
-cp -f ../../target/$EXAMPLE_TAR .
-tar -zxvf $EXAMPLE_TAR
-chmod +x ./bin/*.sh
-nohup ./bin/run_server.sh ./data "127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3" "127.0.0.1:8051:1" &
-cd -
+for ((i = 1; i <= NODE_NUM; i++)); do
+  cur=$HOST
+  ((port = PORT + i))
+  cur=$cur:$port:$i
+  HOST_LIST=$HOST_LIST$cur,
+done
+HOST_LIST=${HOST_LIST/%?/}
+HOST_LIST=$HOST_LIST
 
-mkdir example2
-cd example2
-cp -f ../../target/$EXAMPLE_TAR .
-tar -zxvf $EXAMPLE_TAR
-chmod +x ./bin/*.sh
-nohup ./bin/run_server.sh ./data "127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3" "127.0.0.1:8052:2" &
-cd -
-
-mkdir example3
-cd example3
-cp -f ../../target/$EXAMPLE_TAR .
-tar -zxvf $EXAMPLE_TAR
-chmod +x ./bin/*.sh
-nohup ./bin/run_server.sh ./data "127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3" "127.0.0.1:8053:3" &
-cd -
-
-mkdir client
-cd client
-cp -f ../../target/$EXAMPLE_TAR .
-tar -zxvf $EXAMPLE_TAR
-chmod +x ./bin/*.sh
-cd -
+for ((i = 1; i <= NODE_NUM; i++)); do
+  cur_dir=$NODE_DIR_PREFIX$i
+  mkdir $cur_dir
+  cd $cur_dir || exit
+  cp -f ../../target/$EXAMPLE_TAR .
+  tar -zxf $EXAMPLE_TAR
+  chmod +x ./bin/*.sh
+  cur=$HOST
+  ((port = PORT + i))
+  cur=$cur:$port:$i
+  cur=$cur
+    nohup ./bin/run_server.sh ./data $HOST_LIST $cur &
+  cd .. || exit
+done
