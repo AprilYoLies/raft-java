@@ -8,8 +8,8 @@ NODE_DIR_PREFIX="node"
 HOST="127.0.0.1"
 HOST_LIST=""
 PORT=8050
-NODE_NUM=3
-ELECTION_TIMES=3
+NODE_NUM=7
+ELECTION_TIMES=200
 
 mkdir -p $ROOT_DIR
 cd $ROOT_DIR || exit
@@ -41,6 +41,12 @@ for ((j = 1; j <= ELECTION_TIMES; j++)); do
   for ((i = 1; i <= NODE_NUM; i++)); do
     cur_dir=$NODE_DIR_PREFIX$i
     cd $cur_dir || exit
+    rm -fr ./data
+    cd .. || exit
+  done
+  for ((i = 1; i <= NODE_NUM; i++)); do
+    cur_dir=$NODE_DIR_PREFIX$i
+    cd $cur_dir || exit
     cur=$HOST
     ((port = PORT + i))
     cur=$cur:$port:$i
@@ -48,7 +54,7 @@ for ((j = 1; j <= ELECTION_TIMES; j++)); do
     nohup ./bin/run_server.sh ./data $HOST_LIST $cur &
     cd .. || exit
   done
-  sleep 10
+  sleep 12
   jps | grep ServerMain | cut -c 1-5 | xargs kill -9
-  sleep 5
+  sleep 3
 done
