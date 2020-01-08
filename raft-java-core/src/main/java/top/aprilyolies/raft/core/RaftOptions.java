@@ -13,7 +13,11 @@ public class RaftOptions {
 
     // A follower would become a candidate if it doesn't receive any message
     // from the leader in electionTimeoutMs milliseconds
-    private int electionTimeoutMilliseconds = 5000;
+
+    private int electionTimeoutMilliseconds = 3000;
+
+    // 选举超时随机偏移范围
+    private int electionTimeoutRandomOffset = 3000;
 
     // A leader sends RPCs at least this often, even if there is no data to send
     private int heartbeatPeriodMilliseconds = 500;

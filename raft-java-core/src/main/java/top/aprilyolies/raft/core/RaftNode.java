@@ -641,7 +641,7 @@ public class RaftNode {
     private int getElectionTimeoutMs() {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         int randomElectionTimeout = raftOptions.getElectionTimeoutMilliseconds()    // 默认是 5000 ms
-                + random.nextInt(0, raftOptions.getElectionTimeoutMilliseconds());
+                + random.nextInt(0, raftOptions.getElectionTimeoutRandomOffset());
         LOG.debug("new election time is after {} ms", randomElectionTimeout);
         return randomElectionTimeout;
     }

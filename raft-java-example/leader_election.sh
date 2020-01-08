@@ -8,53 +8,67 @@ NODE_DIR_PREFIX="node"
 HOST="127.0.0.1"
 HOST_LIST=""
 PORT=8050
-NODE_NUM=7
+NODE_NUM=3
 ELECTION_TIMES=200
+RANDOM_RANGE=50
 
 mkdir -p $ROOT_DIR
 cd $ROOT_DIR || exit
 rm -fr ./*
 
-# 复制 tar 包并解压
-for ((i = 1; i <= NODE_NUM; i++)); do
-  cur_dir=$NODE_DIR_PREFIX$i
-  mkdir $cur_dir
-  cd $cur_dir || exit
-  cp -f ../../target/$EXAMPLE_TAR .
-  tar -zxf $EXAMPLE_TAR
-  chmod +x ./bin/*.sh
-  cd .. || exit
-done
+# 3 7 11 15 个节点
+for ((k = 0; k < 4; k++)); do
+  # 三个随机超时范围 100 ~ 200
+  for ((l = 2; l <= 4; l++)); do
+    # 拼接 Server 节点信息
+    ((CUR_NODE_NUM = NODE_NUM + k * 4))
+    ((CUR_RANDOM_RANGE = RANDOM_RANGE * l))
 
-# 拼接 Server 节点信息
-for ((i = 1; i <= NODE_NUM; i++)); do
-  cur=$HOST
-  ((port = PORT + i))
-  cur=$cur:$port:$i
-  HOST_LIST=$HOST_LIST$cur,
-done
-HOST_LIST=${HOST_LIST/%?/}
-HOST_LIST=$HOST_LIST
+    # 复制 tar 包并解压
+    for ((i = 1; i <= CUR_NODE_NUM; i++)); do
+      cur_dir=$NODE_DIR_PREFIX$i
+      mkdir $cur_dir
+      cd $cur_dir || exit
+      cp -f ../../target/$EXAMPLE_TAR .
+      tar -zxf $EXAMPLE_TAR
+      chmod +x ./bin/*.sh
+      cd .. || exit
+    done
 
-# 测试 Leader 选举用时
-for ((j = 1; j <= ELECTION_TIMES; j++)); do
-  for ((i = 1; i <= NODE_NUM; i++)); do
-    cur_dir=$NODE_DIR_PREFIX$i
-    cd $cur_dir || exit
-    rm -fr ./data
-    cd .. || exit
+    for ((i = 1; i <= CUR_NODE_NUM; i++)); do
+      cur=$HOST
+      ((port = PORT + i))
+      cur=$cur:$port:$i
+      HOST_LIST=$HOST_LIST$cur,
+    done
+    HOST_LIST=${HOST_LIST/%?/}
+    HOST_LIST=$HOST_LIST
+
+    # 测试 Leader 选举用时
+    for ((j = 1; j <= ELECTION_TIMES; j++)); do
+      for ((i = 1; i <= CUR_NODE_NUM; i++)); do
+        cur_dir=$NODE_DIR_PREFIX$i
+        cd $cur_dir || exit
+        rm -fr ./data
+        cd .. || exit
+      done
+      for ((i = 1; i <= CUR_NODE_NUM; i++)); do
+        cur_dir=$NODE_DIR_PREFIX$i
+        cd $cur_dir || exit
+        cur=$HOST
+        ((port = PORT + i))
+        cur=$cur:$port:$i
+        cur=$cur
+        nohup ./bin/run_server.sh ./data $HOST_LIST $cur $CUR_RANDOM_RANGE &
+        cd .. || exit
+      done
+      sleep 14
+      jps | grep ServerMain | cut -c 1-5 | xargs kill -9
+      sleep 3
+    done
+    dir_name="node_num_"$CUR_NODE_NUM"_random_range_"$CUR_RANDOM_RANGE
+    echo $dir_name
+    cp -r ../env ../$dir_name
+    rm -fr ./*
   done
-  for ((i = 1; i <= NODE_NUM; i++)); do
-    cur_dir=$NODE_DIR_PREFIX$i
-    cd $cur_dir || exit
-    cur=$HOST
-    ((port = PORT + i))
-    cur=$cur:$port:$i
-    cur=$cur
-    nohup ./bin/run_server.sh ./data $HOST_LIST $cur &
-    cd .. || exit
-  done
-  sleep 12
-  jps | grep ServerMain | cut -c 1-5 | xargs kill -9
-  sleep 3
 done

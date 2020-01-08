@@ -1,6 +1,6 @@
 #!/bin/bash
-if [ $# -ne 3 ]; then
-    echo "Usage: ./run_server.sh DATA_PATH CLUSTER CURRENT_NODE"
+if [ $# -lt 3 ]; then
+    echo "Usage: ./run_server.sh DATA_PATH CLUSTER [ TIMEOUT_RANDOM_OFFSET ]"
     exit
 fi
 
@@ -19,6 +19,7 @@ fi
 DATA_PATH=$1
 CLUSTER=$2
 CURRENT_NODE=$3
+TIMEOUT_RANDOM_OFFSET=$4
 
 JMX_PORT=18101
 GC_LOG=./logs/gc.log
@@ -51,4 +52,4 @@ JAVA_OPTS=" $JAVA_BASE_OPTS $JAVA_MEM_OPTS $JAVA_JMX_OPTS $JAVA_GC_OPTS $JAVA_CP
 
 RUNJAVA="$JAVA_HOME/bin/java"
 MAIN_CLASS=top.aprilyolies.raft.example.server.ServerMain
-$RUNJAVA $JAVA_CP $MAIN_CLASS $DATA_PATH $CLUSTER $CURRENT_NODE
+$RUNJAVA $JAVA_CP $MAIN_CLASS $DATA_PATH $CLUSTER $CURRENT_NODE $TIMEOUT_RANDOM_OFFSET
