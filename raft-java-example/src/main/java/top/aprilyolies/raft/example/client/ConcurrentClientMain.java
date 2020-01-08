@@ -32,7 +32,7 @@ public class ConcurrentClientMain {
 
         int totalTime = 0;  // 统计总耗时
         int times = 30;    // 统计次数
-        int clientNums = 2; // 客户端数量
+        int clientNums = 10; // 客户端数量
         int optNum = 1000;  // 写入记录数
 
         ExecutorService readThreadPool = Executors.newFixedThreadPool(clientNums);
