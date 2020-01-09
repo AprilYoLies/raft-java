@@ -46,14 +46,14 @@ for ((k = 0; k < 4; k++)); do
     CUR_HOST_LIST=${CUR_HOST_LIST/%?/}
 
     # 测试 Leader 选举用时
-    for ((j = 1; j <= ELECTION_TIMES; j++)); do
-      for ((i = 1; i <= CUR_NODE_NUM; i++)); do
+    for ((j = 1; j <= ELECTION_TIMES; j++)); do # 选举 ELECTION_TIMES 次
+      for ((i = 1; i <= CUR_NODE_NUM; i++)); do # 清理元数据信息
         cur_dir=$NODE_DIR_PREFIX$i
         cd $cur_dir || exit
         rm -fr ./data
         cd .. || exit
       done
-      for ((i = 1; i <= CUR_NODE_NUM; i++)); do
+      for ((i = 1; i <= CUR_NODE_NUM; i++)); do # 启动 CUR_NODE_NUM 个节点
         cur_dir=$NODE_DIR_PREFIX$i
         cd $cur_dir || exit
         cur=$HOST

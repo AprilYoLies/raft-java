@@ -865,7 +865,7 @@ public class RaftNode {
                         }
                     }
                     LOG.info("prepareElectionGrantedNum={}", prepareElectionGrantedNum);   // 输出得票数
-                    if (prepareElectionGrantedNum == configuration.getServersCount() / 2 + 1) { // 如果得票数达到门限（保证只会发起一次资格确认请求）
+                    if (prepareElectionGrantedNum >= configuration.getServersCount() / 2 + 1) { // 如果得票数达到门限（保证只会发起一次资格确认请求）
                         LOG.info("get majority grants, serverId={} when prepare election, start election",
                                 localServer.getServerId());
                         prepareElectionOk = true;
@@ -877,8 +877,9 @@ public class RaftNode {
             } finally {
                 lock.unlock();
             }
-            if (prepareElectionOk)
+            if (prepareElectionOk) {
                 startQualificationConfirm();    // 资格确认阶段
+            }
         }
 
         @Override
