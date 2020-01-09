@@ -358,7 +358,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
             }
 
             if (request.getEntriesCount() == 0) {   // 如果追加的日志项长度为 0
-                raftNode.setStartTime(0);
+                raftNode.getStartTime().set(0);
                 LOG.debug("heartbeat request from peer={} at term={}, my term={}",  // 此时收到的就是心跳消息
                         request.getServerId(), request.getTerm(), raftNode.getCurrentTerm());
                 responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS); // 响应心跳收到

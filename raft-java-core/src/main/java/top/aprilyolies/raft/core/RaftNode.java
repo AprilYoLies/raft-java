@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -65,10 +66,10 @@ public class RaftNode {
     // 资格写入标识符
     private boolean qualificationWriteOk;
 
-    private long startTime = 0;
+    private AtomicLong startTime = new AtomicLong(0);
 
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
+    public AtomicLong getStartTime() {
+        return startTime;
     }
 
     private Lock lock = new ReentrantLock();
@@ -565,8 +566,8 @@ public class RaftNode {
      * 选举定时器
      */ // 如果 electionScheduledFuture 不为空，那么取消任务，重新提交一个选举任务，超时时间是随机的
     public void resetElectionTimer() {
-        if (startTime == 0)
-            startTime = System.currentTimeMillis();
+        if (startTime.longValue() == 0)
+            startTime.compareAndSet(0, System.currentTimeMillis());
         if (electionScheduledFuture != null && !electionScheduledFuture.isDone()) { // 如果有任务正在执行，需要取消其中的任务
             electionScheduledFuture.cancel(true);
         }   // 获取一个随机超时时间，为选举超时时间加上 0 ~ electionTimeout 之间的数
@@ -1265,11 +1266,14 @@ public class RaftNode {
 
     // in lock
     private void becomeLeader() {   // 更新自身的状态，取消正在执行的任务
+        if (state != NodeState.STATE_LEADER) {
+            long endTime = System.currentTimeMillis();
+            if (startTime.longValue() != 0)
+                LOG.info("Node-{} start election at {}ms,finish election at {}ms, costs {}ms",
+                        localServer.getServerId(), startTime.longValue(), endTime, endTime - startTime.longValue());
+        }
         state = NodeState.STATE_LEADER; // 更新状态
-        long endTime = System.currentTimeMillis();
-        if (startTime != 0)
-            LOG.info("Node-{} start election at {}ms,finish election at {}ms, costs {}ms",
-                    localServer.getServerId(), startTime, endTime, endTime - startTime);
+        startTime.set(0);
         leaderId = localServer.getServerId();
         // stop vote timer
         if (electionScheduledFuture != null && !electionScheduledFuture.isDone()) { // 如果定时任务不为空，且任务未完成，取消正在执行的任务
