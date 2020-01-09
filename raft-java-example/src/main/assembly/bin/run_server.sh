@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -lt 3 ]; then
-    echo "Usage: ./run_server.sh DATA_PATH CLUSTER [ TIMEOUT_RANDOM_OFFSET ]"
+    echo "Usage: ./run_server.sh DATA_PATH CLUSTER CURRENT_NODE [ TIMEOUT_RANDOM_OFFSET ]"
     exit
 fi
 

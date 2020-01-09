@@ -35,14 +35,14 @@ for ((k = 0; k < 4; k++)); do
       cd .. || exit
     done
 
+    CUR_HOST_LIST=$HOST_LIST
     for ((i = 1; i <= CUR_NODE_NUM; i++)); do
       cur=$HOST
       ((port = PORT + i))
       cur=$cur:$port:$i
-      HOST_LIST=$HOST_LIST$cur,
+      CUR_HOST_LIST=$CUR_HOST_LIST$cur,
     done
-    HOST_LIST=${HOST_LIST/%?/}
-    HOST_LIST=$HOST_LIST
+    CUR_HOST_LIST=${CUR_HOST_LIST/%?/}
 
     # 测试 Leader 选举用时
     for ((j = 1; j <= ELECTION_TIMES; j++)); do
@@ -59,7 +59,7 @@ for ((k = 0; k < 4; k++)); do
         ((port = PORT + i))
         cur=$cur:$port:$i
         cur=$cur
-        nohup ./bin/run_server.sh ./data $HOST_LIST $cur $CUR_RANDOM_RANGE &
+        nohup ./bin/run_server.sh ./data $CUR_HOST_LIST $cur $CUR_RANDOM_RANGE &
         cd .. || exit
       done
       sleep 14
@@ -67,8 +67,12 @@ for ((k = 0; k < 4; k++)); do
       sleep 3
     done
     dir_name="node_num_"$CUR_NODE_NUM"_random_range_"$CUR_RANDOM_RANGE
-    echo $dir_name
     cp -r ../env ../$dir_name
     rm -fr ./*
+    find ../$dir_name -name raft-java-example-1.9.0-deploy.tar.gz | xargs rm -fr
+    find ../$dir_name -name bin | xargs rm -fr
+    find ../$dir_name -name data | xargs rm -fr
+    find ../$dir_name -name lib | xargs rm -fr
+    find ../$dir_name -name logs | xargs rm -fr
   done
 done
