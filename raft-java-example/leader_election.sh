@@ -24,6 +24,7 @@ for ((k = 0; k < 4; k++)); do
     ((CUR_NODE_NUM = NODE_NUM + k * 4))
     ((CUR_RANDOM_RANGE = RANDOM_RANGE * l))
 
+    echo "processing node num "$CUR_NODE_NUM" random range "$CUR_RANDOM_RANGE
     # 复制 tar 包并解压
     for ((i = 1; i <= CUR_NODE_NUM; i++)); do
       cur_dir=$NODE_DIR_PREFIX$i
@@ -62,9 +63,9 @@ for ((k = 0; k < 4; k++)); do
         nohup ./bin/run_server.sh ./data $CUR_HOST_LIST $cur $CUR_RANDOM_RANGE &
         cd .. || exit
       done
-      sleep 14
+      sleep 10
       jps | grep ServerMain | cut -c 1-5 | xargs kill -9
-      sleep 3
+      sleep 2
     done
     dir_name="node_num_"$CUR_NODE_NUM"_random_range_"$CUR_RANDOM_RANGE
     cp -r ../env ../$dir_name

@@ -7,12 +7,12 @@ import java.util.Map;
 
 public class RandomElectionAnylyze {
     public static void main(String[] args) throws Exception {
-        int electionTimes = 30;    // 选举次数
+        int electionTimes = 200;    // 选举次数
         String logFile = "nohup.out";
         int nodeNum = 3;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             int curNodeNum = nodeNum + 4 * i;
-            for (int j = 2; j <= 3; j++) {
+            for (int j = 2; j <= 4; j++) {
                 int randomRange = j * 50;
                 String dirName = "raft-java-analyze/random_election/" + "node_num_" + curNodeNum + "_random_range_" + randomRange + "/";
                 File rootDir = new File(dirName);

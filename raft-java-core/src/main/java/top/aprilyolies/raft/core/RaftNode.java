@@ -1270,7 +1270,6 @@ public class RaftNode {
         if (startTime != 0)
             LOG.info("Node-{} start election at {}ms,finish election at {}ms, costs {}ms",
                     localServer.getServerId(), startTime, endTime, endTime - startTime);
-        startTime = 0;
         leaderId = localServer.getServerId();
         // stop vote timer
         if (electionScheduledFuture != null && !electionScheduledFuture.isDone()) { // 如果定时任务不为空，且任务未完成，取消正在执行的任务
