@@ -17,7 +17,7 @@ cd $ROOT_DIR || exit
 rm -fr ./*
 
 # 3 7 11 15 个节点
-for ((k = 3; k < 4; k++)); do
+for ((k = 0; k < 4; k++)); do
   # 拼接 Server 节点信息
   ((CUR_NODE_NUM = NODE_NUM + k * 4))
 
