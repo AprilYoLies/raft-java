@@ -61,7 +61,7 @@ for ((k = 0; k < 4; k++)); do
       cd .. || exit
     done
     sleep 10
-    jps | grep ServerMain | cut -c 1-5 | xargs kill -9
+    jps | grep ServerMain | cut -f 1 -d " " | xargs kill -9
     sleep 2
   done
   dir_name="node_num_"$CUR_NODE_NUM
