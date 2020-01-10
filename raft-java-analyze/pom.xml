@@ -76,5 +76,23 @@
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
         </dependency>
+        <dependency>
+            <groupId>com.googlecode.protobuf-java-format</groupId>
+            <artifactId>protobuf-java-format</artifactId>
+            <version>1.4</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.baidu</groupId>
+            <artifactId>brpc-java</artifactId>
+            <version>2.5.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>top.aprilyolies.example.raft</groupId>
+            <artifactId>raft-java-example</artifactId>
+            <version>1.9.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

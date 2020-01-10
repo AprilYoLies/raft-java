@@ -41,7 +41,7 @@ public class RaftOptions {
     private long maxAwaitTimeout = 1000;
 
     // 与其他节点进行同步、选主等操作的线程池大小
-    private int raftConsensusThreadNum = 20;
+    private int raftConsensusThreadNum = 30;
 
     // 是否异步写数据；true表示主节点保存后就返回，然后异步同步给从节点；
     // false表示主节点同步给大多数从节点后才返回。
