@@ -48,7 +48,7 @@ public class ServerMain {
         raftOptions.setSnapshotMinLogSize(10 * 1024);   // 最小快照长度 10 KB
         raftOptions.setSnapshotPeriodSeconds(30);   // 快照时间间隔 30 S
         raftOptions.setMaxSegmentFileSize(1024 * 1024); // 最大日志段文件长度 1 MB
-        raftOptions.setPriorityElection(true);  // 基于节点优先级的 Leader 选举方案
+        raftOptions.setPriorityElection(false);  // 基于节点优先级的 Leader 选举方案
 //        raftOptions.setConcurrentWrite(true);   // 并发写入方案
 //        raftOptions.setConcurrentWindow(50);
         // 应用状态机
