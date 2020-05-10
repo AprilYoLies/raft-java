@@ -3,10 +3,6 @@ package top.aprilyolies.raft.core.service;
 
 import top.aprilyolies.raft.core.proto.RaftProto;
 
-/**
- * raft集群管理接口。
- * Created by wenweihu86 on 2017/5/14.
- */
 public interface RaftClientService {
 
     /**

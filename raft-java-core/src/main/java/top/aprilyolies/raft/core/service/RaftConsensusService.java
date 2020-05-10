@@ -3,10 +3,6 @@ package top.aprilyolies.raft.core.service;
 
 import top.aprilyolies.raft.core.proto.RaftProto;
 
-/**
- * raft节点之间相互通信的接口。
- * Created by wenweihu86 on 2017/5/2.
- */
 public interface RaftConsensusService {
     // 预投票
     RaftProto.VoteResponse preVote(RaftProto.VoteRequest request);

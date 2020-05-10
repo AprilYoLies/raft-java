@@ -18,9 +18,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * Created by wenweihu86 on 2017/5/6.
- */
 public class Snapshot {
 
     public class SnapshotDataFile {
@@ -38,8 +35,8 @@ public class Snapshot {
     private Lock lock = new ReentrantLock();
 
     public Snapshot(String raftDataDir) {   // 创建快照类，主要是创建了快照对应的目录
-        this.snapshotDir = raftDataDir + File.separator + "snapshot";   // 快照目录
-        String snapshotDataDir = snapshotDir + File.separator + "data";
+        this.snapshotDir = raftDataDir + File.separator + "snapshot";   // 快照目录 ./data1/snapshot
+        String snapshotDataDir = snapshotDir + File.separator + "data"; // ./data1/snapshot/data
         File file = new File(snapshotDataDir);
         if (!file.exists()) {
             file.mkdirs();

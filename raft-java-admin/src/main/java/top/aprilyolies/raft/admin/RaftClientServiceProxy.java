@@ -12,10 +12,6 @@ import top.aprilyolies.raft.core.service.RaftClientService;
 
 import java.util.List;
 
-/**
- * 非线程安全
- * Created by wenweihu86 on 2017/5/14.
- */
 public class RaftClientServiceProxy implements RaftClientService {
     private static final Logger LOG = LoggerFactory.getLogger(RaftClientServiceProxy.class);
     private static final JsonFormat jsonFormat = new JsonFormat();

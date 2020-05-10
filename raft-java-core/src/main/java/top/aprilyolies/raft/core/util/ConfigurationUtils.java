@@ -5,9 +5,6 @@ import top.aprilyolies.raft.core.proto.RaftProto;
 
 import java.util.List;
 
-/**
- * Created by wenweihu86 on 2017/5/22.
- */
 public class ConfigurationUtils {
 
     // configuration不会太大，所以这里直接遍历了

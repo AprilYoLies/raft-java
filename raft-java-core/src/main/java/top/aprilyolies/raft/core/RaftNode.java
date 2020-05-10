@@ -23,7 +23,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by wenweihu86 on 2017/5/2.
  * 该类是raft核心类，主要有如下功能：
  * 1、保存raft节点核心数据（节点状态信息、日志信息、snapshot等），
  * 2、raft节点向别的raft发起rpc请求相关函数
@@ -85,8 +84,8 @@ public class RaftNode {
     private ScheduledFuture electionScheduledFuture;
     private ScheduledFuture heartbeatScheduledFuture;
 
-    // 将本地的日志段文件载入到 SegmentedLog，读取本地的快照，通过本地快照恢复 currentTerm、votedFor、commitIndex，
-    public RaftNode(RaftOptions raftOptions,    // 并砍掉快照之前的全部日志项，应用本地快照的数据，和之后的索引项
+    // 将本地的日志段文件载入到 SegmentedLog，读取本地的快照，通过本地元数据恢复 currentTerm、votedFor、commitIndex，
+    public RaftNode(RaftOptions raftOptions,    // 并砍掉快照之前的全部日志项，加载本地快照数据给状态机，应用日志项到 commitIndex
                     List<RaftProto.Server> servers,
                     RaftProto.Server localServer,
                     StateMachine stateMachine) {
@@ -109,7 +108,7 @@ public class RaftNode {
 
         currentTerm = raftLog.getMetaData().getCurrentTerm();   // 获取日志元数据中的任期号
         votedFor = raftLog.getMetaData().getVotedFor(); // 获取日志元数据中的投票值
-        commitIndex = Math.max(snapshot.getMetaData().getLastIncludedIndex(), commitIndex); // 确定 commit index
+        commitIndex = Math.max(snapshot.getMetaData().getLastIncludedIndex(), commitIndex); // 确定 commit index，大于等于 snapshot 的最后一条日志项
         // discard old log entries 丢弃过期日志项
         if (snapshot.getMetaData().getLastIncludedIndex() > 0   // 如果进行过快照，且本机还包含快照过的日志项
                 && raftLog.getFirstLogIndex() <= snapshot.getMetaData().getLastIncludedIndex()) {
@@ -120,7 +119,7 @@ public class RaftNode {
         if (snapshotConfiguration.getServersCount() > 0) {  // 如果元数据的配置的节点数大于 0，就是用这个配置信息
             configuration = snapshotConfiguration;
         }
-        String snapshotDataDir = snapshot.getSnapshotDir() + File.separator + "data";   // 快照数据目录
+        String snapshotDataDir = snapshot.getSnapshotDir() + File.separator + "data";   // 快照数据目录 ./data1/snapshot/data
         stateMachine.readSnapshot(snapshotDataDir); // 通过状态机读取快照，如果 rocksdb 文件夹存在，删除，然后将快照的文件夹拷贝到 rocksdb 中，最后构建 RocksDB，打开位置为 rocksdb 目录
         for (long index = snapshot.getMetaData().getLastIncludedIndex() + 1;
              index <= commitIndex; index++) {   // 如果快照之后到 commitIndex 之间有剩余的日志项
@@ -447,7 +446,8 @@ public class RaftNode {
         }
     }
 
-    // 拍快照，检查当前是否满足拍快照的条件，拍快照，然后将结果替换原快照的内容，然后重新载入快照元信息，并删除过期的日志项
+    // 拍快照，检查当前是否满足拍快照的条件（文件大小、appliedIndex），更新快照元信息（lastIndex、lastTerm、configuration），然后将
+    // 拍快照并替换原快照的内容，然后重新载入快照元信息，并删除过期的日志项
     public void takeSnapshot() {
         if (snapshot.getIsInstallSnapshot().get()) {    // 如果正在安装快照，忽略拍快照
             LOG.info("already in install snapshot, ignore take snapshot");
@@ -504,7 +504,7 @@ public class RaftNode {
                 snapshot.getLock().unlock();
             }
 
-            if (success) {
+            if (success) {  // 如果拍快照成功，删除多余的日志项
                 // 重新加载snapshot
                 long lastSnapshotIndex = 0;
                 snapshot.getLock().lock();  // 获取快照锁
@@ -785,7 +785,7 @@ public class RaftNode {
             try {
                 peer.setVoteGranted(response.getGranted()); // 将其它节点的投票结果进行标记
                 if (currentTerm != request.getTerm() || state != NodeState.STATE_PRE_CANDIDATE) {
-                    LOG.info("ignore preVote RPC result");
+                    LOG.info("ignore preVote RPC result");  // 如果自己的任期发生了变化，身份不是预候选人，忽略响应消息
                     return;
                 }
                 if (response.getTerm() > currentTerm) { // 如果别人的任期号大于自己的任期号
@@ -794,7 +794,7 @@ public class RaftNode {
                             peer.getServer().getServerId(),
                             response.getTerm(),
                             currentTerm);
-                    stepDown(response.getTerm());   // 别人的任期号比自己的大，需要降级，就是更新自己的任期号、同时取消自己设置的心跳任务
+                    stepDown(response.getTerm());   // 别人的任期号比自己的大，需要降级，更新自己的任期号（更新元数据 currentTerm、votedFor）、同时取消自己设置的心跳任务
                 } else {
                     if (response.getGranted()) {    // 如果这个节点投的是赞成票
                         LOG.info("get pre vote granted from server {} for term {}",

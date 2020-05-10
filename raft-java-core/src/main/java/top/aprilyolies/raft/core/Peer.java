@@ -6,9 +6,6 @@ import com.baidu.brpc.client.instance.Endpoint;
 import top.aprilyolies.raft.core.proto.RaftProto;
 import top.aprilyolies.raft.core.service.RaftConsensusServiceAsync;
 
-/**
- * Created by wenweihu86 on 2017/5/5.
- */
 public class Peer {
     private RaftProto.Server server;
     private RpcClient rpcClient;

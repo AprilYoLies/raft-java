@@ -3,10 +3,6 @@ package top.aprilyolies.raft.core;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * raft配置选项
- * Created by wenweihu86 on 2017/5/2.
- */
 @Setter
 @Getter
 public class RaftOptions {

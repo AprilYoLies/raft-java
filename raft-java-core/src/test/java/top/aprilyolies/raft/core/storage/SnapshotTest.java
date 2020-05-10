@@ -1,6 +1,5 @@
 package top.aprilyolies.raft.core.storage;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,9 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.TreeMap;
 
-/**
- * Created by wenweihu86 on 2017/7/2.
- */
 public class SnapshotTest {
 
     @Test
@@ -38,7 +34,7 @@ public class SnapshotTest {
         Assert.assertTrue(snapshotFileMap.size() == 2);
         Assert.assertTrue(snapshotFileMap.firstKey().equals("queue1.txt"));
 
-        Files.delete(link);
-        FileUtils.deleteDirectory(new File(raftDataDir));
+//        Files.delete(link);
+//        FileUtils.deleteDirectory(new File(raftDataDir));
     }
 }

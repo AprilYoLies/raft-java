@@ -13,9 +13,6 @@ import top.aprilyolies.raft.core.util.ConfigurationUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by wenweihu86 on 2017/5/14.
- */
 public class RaftClientServiceImpl implements RaftClientService {
     private static final Logger LOG = LoggerFactory.getLogger(RaftClientServiceImpl.class);
     private static final JsonFormat jsonFormat = new JsonFormat();

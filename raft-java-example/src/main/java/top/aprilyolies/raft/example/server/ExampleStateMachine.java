@@ -12,9 +12,6 @@ import top.aprilyolies.raft.example.server.service.ExampleProto;
 
 import java.io.File;
 
-/**
- * Created by wenweihu86 on 2017/5/9.
- */
 public class ExampleStateMachine implements StateMachine {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExampleStateMachine.class);
@@ -49,12 +46,12 @@ public class ExampleStateMachine implements StateMachine {
             if (db != null) {   // 直接关闭 RocksDB（快照就包含了全部的执行结果）
                 db.close();
             }
-            String dataDir = raftDataDir + File.separator + "rocksdb_data"; // RocksDB 的数据目录
+            String dataDir = raftDataDir + File.separator + "rocksdb_data"; // RocksDB 的数据目录    ./data1/rocksdb_data
             File dataFile = new File(dataDir);  // /Users/eva/IdeaProjects/raft-java/raft-java-example/data/rocksdb_data    // RocksDB 的数据目录对应的 File
             if (dataFile.exists()) {    // 如果 RocksDB 的数据目录已存在，删除存在的数据目录
                 FileUtils.deleteDirectory(dataFile);
             }
-            File snapshotFile = new File(snapshotDir);  // 快照文件对应的 File
+            File snapshotFile = new File(snapshotDir);  // 快照文件对应的 File ./data1/snapshot/data
             if (snapshotFile.exists()) {
                 FileUtils.copyDirectory(snapshotFile, dataFile);    // 将快照 data 拷贝到 rocksdb 中
             }

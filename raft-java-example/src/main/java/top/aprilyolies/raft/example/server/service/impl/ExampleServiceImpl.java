@@ -14,9 +14,6 @@ import top.aprilyolies.raft.example.server.service.ExampleService;
 
 import java.util.concurrent.Semaphore;
 
-/**
- * Created by wenweihu86 on 2017/5/9.
- */
 public class ExampleServiceImpl implements ExampleService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExampleServiceImpl.class);

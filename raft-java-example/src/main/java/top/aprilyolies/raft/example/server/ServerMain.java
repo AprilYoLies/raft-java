@@ -14,9 +14,6 @@ import top.aprilyolies.raft.example.server.service.impl.ExampleServiceImpl;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by wenweihu86 on 2017/5/9.
- */
 public class ServerMain {
     public static void main(String[] args) {
         if (args.length < 3) {
@@ -48,8 +45,8 @@ public class ServerMain {
         raftOptions.setSnapshotMinLogSize(10 * 1024);   // 最小快照长度 10 KB
         raftOptions.setSnapshotPeriodSeconds(30);   // 快照时间间隔 30 S
         raftOptions.setMaxSegmentFileSize(1024 * 1024); // 最大日志段文件长度 1 MB
-        raftOptions.setPriorityElection(false);  // 基于节点优先级的 Leader 选举方案
-        raftOptions.setConcurrentWrite(true);   // 并发写入方案
+        raftOptions.setPriorityElection(true);  // 基于节点优先级的 Leader 选举方案
+        raftOptions.setConcurrentWrite(false);   // 并发写入方案
         raftOptions.setConcurrentWindow(50);
         // 应用状态机
         ExampleStateMachine stateMachine = new ExampleStateMachine(raftOptions.getDataDir());   // 创建 ExampleStateMachine，保存了路径

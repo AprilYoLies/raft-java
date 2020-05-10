@@ -1,9 +1,5 @@
 package top.aprilyolies.raft.core;
 
-/**
- * Raft状态机接口类
- * Created by wenweihu86 on 2017/5/10.
- */
 public interface StateMachine {
 
     /**

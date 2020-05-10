@@ -11,9 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by wenweihu86 on 2017/6/30.
- */
 public class SegmentedLogTest {
 
     @Test

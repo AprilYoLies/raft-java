@@ -13,9 +13,6 @@ import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.TreeMap;
 
-/**
- * Created by wenweihu86 on 2017/5/3.
- */
 public class SegmentedLog {
 
     private static Logger LOG = LoggerFactory.getLogger(SegmentedLog.class);
@@ -30,14 +27,14 @@ public class SegmentedLog {
 
     // 尝试加载段数据（本地），加载了本地的元数据，将日志段数据解析为 Segment，然后更新了元数据信息
     public SegmentedLog(String raftDataDir, int maxSegmentFileSize) {
-        this.logDir = raftDataDir + File.separator + "log";
-        this.logDataDir = logDir + File.separator + "data";
-        this.maxSegmentFileSize = maxSegmentFileSize;
+        this.logDir = raftDataDir + File.separator + "log"; // ./data1/log
+        this.logDataDir = logDir + File.separator + "data"; // ./data1/log/data
+        this.maxSegmentFileSize = maxSegmentFileSize;   // 1024 * 1024
         File file = new File(logDataDir);
         if (!file.exists()) {
             file.mkdirs();
         }
-        readSegments(); // 尝试读取本地的日志段文件，然后封装为 Segment
+        readSegments(); // 尝试读本地文件，Segment 实例记录文件名（open 或者 start-end），交由 startLogIndexSegmentMap 保存
         for (Segment segment : startLogIndexSegmentMap.values()) {  // 段文件的加载
             this.loadSegmentData(segment);  // 将日志段段文件解析为 LogEntry list，然后将解析出来的 list 保存到 Segment 中，更新 totalSize 以及 startIndex 和 endIndex
         }
@@ -276,7 +273,7 @@ public class SegmentedLog {
         }
     }
 
-    // 尝试读本地文件
+    // 尝试读本地文件，Segment 实例记录文件名（open 或者 start-end），交由 startLogIndexSegmentMap 保存
     public void readSegments() {
         try {   // 列出 /Users/eva/IdeaProjects/raft-java/raft-java-example/data/log/data 下边的全部文件
             List<String> fileNames = RaftFileUtils.getSortedFilesInDirectory(logDataDir, logDataDir);

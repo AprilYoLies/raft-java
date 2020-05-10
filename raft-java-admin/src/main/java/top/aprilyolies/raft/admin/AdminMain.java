@@ -8,9 +8,6 @@ import top.aprilyolies.raft.core.service.RaftClientService;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by wenweihu86 on 2017/5/14.
- */
 public class AdminMain {
     private static final JsonFormat jsonFormat = new JsonFormat();
 

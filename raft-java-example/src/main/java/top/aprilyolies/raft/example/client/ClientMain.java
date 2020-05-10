@@ -6,9 +6,6 @@ import top.aprilyolies.raft.example.server.service.ExampleProto;
 import top.aprilyolies.raft.example.server.service.ExampleService;
 import com.googlecode.protobuf.format.JsonFormat;
 
-/**
- * Created by wenweihu86 on 2017/5/14.
- */
 public class ClientMain {
     public static void main(String[] args) {
         if (args.length < 2) {
@@ -33,17 +30,17 @@ public class ClientMain {
         for (int i = 0; i < 20; i++) {
             if (value != null) {
                 ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()   // 构建对应的GET请求消息
-                        .setKey(key).setValue(value).build();
+                        .setKey(key + i).setValue(value + i).build();
                 ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
                 System.out.printf("set request, key=%s value=%s response=%s\n",
-                        key, value, jsonFormat.printToString(setResponse));
+                        key + i, value + i, jsonFormat.printToString(setResponse));
             } else {
                 // get
                 ExampleProto.GetRequest getRequest = ExampleProto.GetRequest.newBuilder()   // 构建对应的PUT请求消息
-                        .setKey(key).build();
+                        .setKey(key + i).build();
                 ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
                 System.out.printf("get request, key=%s, response=%s\n",
-                        key, jsonFormat.printToString(getResponse));
+                        key + i, jsonFormat.printToString(getResponse));
             }
         }
 

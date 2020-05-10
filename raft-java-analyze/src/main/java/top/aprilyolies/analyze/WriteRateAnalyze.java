@@ -16,9 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-/**
- * Created by wenweihu86 on 2017/5/14.
- */
 public class WriteRateAnalyze {
     private static JsonFormat jsonFormat = new JsonFormat();
     private static CountDownLatch latch;

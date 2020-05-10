@@ -13,9 +13,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Created by wenweihu86 on 2017/5/14.
- */
 public class WriteLatencyAnalyze {
     private static JsonFormat jsonFormat = new JsonFormat();
     private static CountDownLatch latch;

@@ -12,9 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-/**
- * Created by wenweihu86 on 2017/5/14.
- */
 public class ConcurrentClientMain {
     private static JsonFormat jsonFormat = new JsonFormat();
     private static CountDownLatch latch;
@@ -32,7 +29,7 @@ public class ConcurrentClientMain {
 
         int totalTime = 0;  // 统计总耗时
         int times = 30;    // 统计次数
-        int clientNums = 10; // 客户端数量
+        int clientNums = 1; // 客户端数量
         int optNum = 1000;  // 写入记录数
 
         ExecutorService readThreadPool = Executors.newFixedThreadPool(clientNums);

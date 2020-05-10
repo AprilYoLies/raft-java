@@ -18,9 +18,6 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by wenweihu86 on 2017/5/2.
- */
 public class RaftConsensusServiceImpl implements RaftConsensusService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RaftConsensusServiceImpl.class);
@@ -192,7 +189,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                 responseBuilder.setGranted(true);  // 同意请求
                 return responseBuilder.build(); // 返回响应的结果
             }
-            responseBuilder.setGranted(false);  // 自己已经进入 Leader 竞选阶段了，否定请求
+            responseBuilder.setGranted(true);  // 自己已经进入 Leader 竞选阶段了，否定请求
             return responseBuilder.build(); // 返回响应的结果
         } finally {
             raftNode.getLock().unlock();
